@@ -12,8 +12,11 @@ const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 const cairo = Cairo({ variable: "--font-cairo", subsets: ["arabic", "latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: { default: `${SITE_NAME}: ${SITE_TAGLINE}`, template: `%s · ${SITE_NAME}` },
   description: "Daily betting slips with a confidence score on every pick.",
+  openGraph: { siteName: SITE_NAME, type: "website", images: [{ url: "/brand/betslipz-og.png", width: 1200, height: 630 }] },
+  twitter: { card: "summary_large_image", images: ["/brand/betslipz-og.png"] },
 };
 
 export function generateStaticParams() {

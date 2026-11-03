@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="512" height="512">
+  <title>BetSlipz icon</title>
+  <rect width="180" height="180" rx="40" fill="#0B1220"/>
+  <g transform="translate(4 2)">
+  <g transform="translate(22 14)">
+    <g transform="rotate(10 50 65) translate(14 4)"><path d="M12 0 H88 A12 12 0 0 1 100 12 V52 A10 10 0 0 0 100 72 V118 A12 12 0 0 1 88 130 H12 A12 12 0 0 1 0 118 V72 A10 10 0 0 0 0 52 V12 A12 12 0 0 1 12 0 Z" fill="#13A34A"/></g>
+    <g transform="rotate(-6 50 65)">
+      <path d="M12 0 H88 A12 12 0 0 1 100 12 V52 A10 10 0 0 0 100 72 V118 A12 12 0 0 1 88 130 H12 A12 12 0 0 1 0 118 V72 A10 10 0 0 0 0 52 V12 A12 12 0 0 1 12 0 Z" fill="#2BE36B"/>
+      <line x1="14" y1="62" x2="86" y2="62" stroke="#0B1220" stroke-width="3" stroke-dasharray="5 5" opacity=".55"/>
+      <path d="M28 34 L44 48 L72 18" fill="none" stroke="#0B1220" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="18" y="80" width="64" height="9" rx="4.5" fill="#0B1220" opacity=".85"/>
+      <rect x="18" y="97" width="42" height="9" rx="4.5" fill="#0B1220" opacity=".55"/>
+    </g>
+  </g></g>
+</svg>

@@ -44,7 +44,7 @@ export default function SlipCard({
             <span>
               <span className="text-muted">{t.common.stake}: </span>
               <b>
-                {slip.stake_units} {t.common.units}
+                {slip.stake_units} {Number(slip.stake_units) === 1 ? t.common.unit : t.common.units}
               </b>
             </span>
           </div>
