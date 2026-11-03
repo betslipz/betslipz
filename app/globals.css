@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+/* Brand tokens: change colors here to re-skin the whole site. */
+:root {
+  --bg: #070b14;
+  --surface: #0e1524;
+  --surface-2: #141d30;
+  --border: #22304a;
+  --text: #e8edf6;
+  --muted: #8b98b0;
+  --accent: #22c55e; /* pitch green */
+  --accent-strong: #16a34a;
+  --vip: #f5b301; /* gold */
+  --danger: #ef4444;
+  --warning: #f59e0b;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-vip: var(--vip);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --font-sans: var(--font-inter), var(--font-cairo), system-ui, sans-serif;
+  --font-arabic: var(--font-cairo), var(--font-inter), system-ui, sans-serif;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+html[lang="ar"] body {
+  font-family: var(--font-arabic);
+}
+
+/* Subtle pitch-line glow behind hero sections */
+.hero-glow {
+  background:
+    radial-gradient(60rem 30rem at 50% -10%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 70%),
+    radial-gradient(40rem 20rem at 90% 10%, color-mix(in oklab, var(--vip) 10%, transparent), transparent 70%);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+}
+
+.input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 0.625rem;
+  padding: 0.6rem 0.8rem;
+  color: var(--text);
+  outline: none;
+}
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 25%, transparent);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.625rem;
+  padding: 0.6rem 1.1rem;
+  font-weight: 600;
+  transition: background 0.15s, transform 0.05s, border-color 0.15s;
+  cursor: pointer;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #04130a;
+}
+.btn-primary:hover {
+  background: var(--accent-strong);
+}
+.btn-vip {
+  background: var(--vip);
+  color: #1a1200;
+}
+.btn-vip:hover {
+  background: #e0a400;
+}
+.btn-ghost {
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.btn-ghost:hover {
+  border-color: var(--muted);
+}
+.btn-danger {
+  background: color-mix(in oklab, var(--danger) 85%, black);
+  color: white;
+}
+
+.label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
