@@ -44,7 +44,7 @@ export default async function AdminPayments({ params, searchParams }: PageProps<
         <div className="flex gap-2 text-sm">
           {["pending", "approved", "rejected", "all"].map((s) => (
             <a key={s} href={`?status=${s}`} className={`rounded-lg px-3 py-1.5 ${s === status ? "bg-surface-2 text-text" : "text-muted"}`}>
-              {s === "all" ? "All" : t.common[s as "pending" | "approved" | "rejected"]}
+              {t.common[s as "all" | "pending" | "approved" | "rejected"]}
             </a>
           ))}
         </div>

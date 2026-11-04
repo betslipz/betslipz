@@ -38,23 +38,27 @@ const slipSchema = z.object({
   notes_ar: z.string().trim().max(4000).optional().transform((v) => v || null),
   betarabia_code: z.string().trim().max(60).optional().transform((v) => v || null),
   publish_at: z.string().datetime(),
-  legs: z.array(legSchema).min(1).max(30),
+  legs: z.array(legSchema).max(30),
 });
 
 export async function saveSlip(_: FormState, formData: FormData): Promise<FormState> {
   const { locale, session, supabase } = await adminContext(formData);
   const id = formData.get("id") ? String(formData.get("id")) : null;
+  // "image" = screenshot-only slip: no typed picks, total odds entered by hand.
+  const imageMode = formData.get("mode") === "image";
+  const text = (key: string) => String(formData.get(key) ?? "").trim();
 
   let legs: unknown;
   try {
-    legs = JSON.parse(String(formData.get("legs") ?? "[]"));
+    legs = imageMode ? [] : JSON.parse(String(formData.get("legs") ?? "[]"));
   } catch {
     return { error: "Invalid selections" };
   }
+  if (!imageMode && (!Array.isArray(legs) || legs.length === 0)) return { error: "Add at least one selection" };
   const parsed = slipSchema.safeParse({
     tier: formData.get("tier"),
-    title_en: formData.get("title_en"),
-    title_ar: formData.get("title_ar") ?? undefined,
+    title_en: text("title_en") || text("title_en_auto"),
+    title_ar: text("title_ar") || text("title_ar_auto") || undefined,
     confidence: formData.get("confidence"),
     stake_units: formData.get("stake_units"),
     notes_en: formData.get("notes_en") ?? undefined,
@@ -68,11 +72,21 @@ export async function saveSlip(_: FormState, formData: FormData): Promise<FormSt
     return { error: `${issue.path.join(".")}: ${issue.message}` };
   }
   const { legs: legRows, ...fields } = parsed.data;
-  const total_odds = Math.round(legRows.reduce((acc, l) => acc * l.odds, 1) * 100) / 100;
+  let total_odds = Math.round(legRows.reduce((acc, l) => acc * l.odds, 1) * 100) / 100;
+  if (imageMode) {
+    const manual = z.coerce.number().min(1).max(100000).safeParse(formData.get("total_odds"));
+    if (!manual.success) return { error: "Total odds must be 1.00 or more" };
+    total_odds = Math.round(manual.data * 100) / 100;
+  }
 
   let image_path: string | undefined;
   const file = formData.get("image");
-  if (file instanceof File && file.size > 0) {
+  const hasFile = file instanceof File && file.size > 0;
+  if (imageMode && !hasFile) {
+    const existing = id ? (await supabase.from("slips").select("image_path").eq("id", id).maybeSingle()).data?.image_path : null;
+    if (!existing) return { error: "Add the betslip screenshot" };
+  }
+  if (hasFile) {
     const ext = IMAGE_TYPES[file.type];
     if (!ext || file.size > 5 * 1024 * 1024) return { error: "Image must be PNG/JPG/WEBP, max 5MB" };
     image_path = `${randomUUID()}.${ext}`;
@@ -91,10 +105,12 @@ export async function saveSlip(_: FormState, formData: FormData): Promise<FormSt
     if (error) return { error: error.message };
     slipId = data.id;
   }
-  const { error: legError } = await supabase
-    .from("slip_legs")
-    .insert(legRows.map((l, i) => ({ ...l, kickoff_at: l.kickoff_at ?? null, slip_id: slipId, position: i })));
-  if (legError) return { error: legError.message };
+  if (legRows.length) {
+    const { error: legError } = await supabase
+      .from("slip_legs")
+      .insert(legRows.map((l, i) => ({ ...l, kickoff_at: l.kickoff_at ?? null, slip_id: slipId, position: i })));
+    if (legError) return { error: legError.message };
+  }
 
   revalidatePath(`/${locale}/slips`);
   revalidatePath(`/${locale}/admin/slips`);

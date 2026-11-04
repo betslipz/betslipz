@@ -2,80 +2,87 @@ import Link from "next/link";
 import type { Locale } from "@/lib/config";
 import { getDictionary } from "@/lib/i18n";
 import { getSession } from "@/lib/auth";
+import { adminNav, pendingPaymentsCount, siteNav } from "@/lib/nav";
 import Logo from "./Logo";
 import LanguageSwitch from "./LanguageSwitch";
-import MobileMenu from "./MobileMenu";
-import { logout } from "@/app/actions/auth";
+import SideMenu from "./nav/SideMenu";
+import Icon from "./nav/Icon";
 
 export default async function Header({ locale }: { locale: Locale }) {
   const t = getDictionary(locale);
   const session = await getSession();
-  const links = [
-    { href: `/${locale}/slips`, label: t.nav.slips },
-    { href: `/${locale}/results`, label: t.nav.results },
-    { href: `/${locale}#pricing`, label: t.nav.pricing },
-  ];
-  if (session) links.push({ href: `/${locale}/account`, label: t.nav.account });
-  if (session?.role === "admin") links.push({ href: `/${locale}/admin`, label: t.nav.admin });
-
-  const authArea = session ? (
-    <form action={logout}>
-      <input type="hidden" name="locale" value={locale} />
-      <button className="btn btn-ghost text-sm">{t.nav.logout}</button>
-    </form>
-  ) : (
-    <>
-      <Link href={`/${locale}/login`} className="btn btn-ghost text-sm">
-        {t.nav.login}
-      </Link>
-      <Link href={`/${locale}/signup`} className="btn btn-primary text-sm">
-        {t.nav.signup}
-      </Link>
-    </>
-  );
-
-  const tierBadge = session?.tier && (
-    <span
-      className={`rounded-full px-2.5 py-1 text-xs font-bold ${
-        session.tier === "vip" ? "bg-vip text-[#1a1200]" : "bg-accent/15 text-accent"
-      }`}
-    >
-      {session.tier === "vip" ? t.common.vip : t.common.regular}
-    </span>
-  );
+  const isAdmin = session?.role === "admin";
+  const pending = isAdmin ? await pendingPaymentsCount() : 0;
+  const tierLabel = session?.tier === "vip" ? `★ ${t.common.vip}` : session?.tier === "regular" ? t.common.regular : null;
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-bg/85 backdrop-blur">
-      <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+      <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 sm:gap-3">
+        <SideMenu
+          locale={locale}
+          labels={{
+            menu: t.nav.menu,
+            close: t.nav.close,
+            browse: t.nav.browse,
+            adminPanel: t.nav.adminPanel,
+            language: t.nav.language,
+            login: t.nav.login,
+            signup: t.nav.signup,
+            logout: t.nav.logout,
+            guest: t.nav.guest,
+            noPlan: t.nav.noPlan,
+            admin: t.nav.admin,
+          }}
+          user={session ? { name: session.fullName ?? "", email: session.email, tierLabel, vip: session.tier === "vip", admin: isAdmin } : null}
+          siteItems={siteNav(locale, t, session)}
+          adminItems={isAdmin ? adminNav(locale, t, pending) : null}
+        />
         <Link href={`/${locale}`} aria-label={t.nav.home}>
           <Logo />
         </Link>
-        <nav className="hidden items-center gap-6 text-sm text-muted md:flex">
-          {links.map((l) => (
-            <Link key={l.href} href={l.href} className="hover:text-text">
-              {l.label}
+
+        <div className="ms-auto flex items-center gap-2">
+          {isAdmin && (
+            <Link
+              href={`/${locale}/admin`}
+              className="relative btn gap-1.5 border border-danger/40 bg-danger/10 px-3 text-sm font-bold text-danger hover:bg-danger/20"
+            >
+              <Icon name="shield" className="h-4 w-4" />
+              <span className="hidden sm:inline">{t.nav.admin}</span>
+              {pending > 0 && (
+                <span className="absolute -end-2 -top-2 min-w-5 rounded-full bg-danger px-1 text-center text-[11px] font-bold leading-5 text-white" dir="ltr">
+                  {pending}
+                </span>
+              )}
             </Link>
-          ))}
-        </nav>
-        <div className="hidden items-center gap-2 md:flex">
-          {tierBadge}
-          <LanguageSwitch locale={locale} label={t.nav.language} />
-          {authArea}
-        </div>
-        <MobileMenu>
-          <div className="flex flex-col gap-3 p-4">
-            {tierBadge && <div>{tierBadge}</div>}
-            {links.map((l) => (
-              <Link key={l.href} href={l.href} className="py-1 text-text">
-                {l.label}
+          )}
+          {tierLabel && (
+            <span
+              className={`hidden rounded-full px-2.5 py-1 text-xs font-bold sm:inline ${
+                session?.tier === "vip" ? "bg-vip text-[#1a1200]" : "bg-accent/15 text-accent"
+              }`}
+            >
+              {tierLabel}
+            </span>
+          )}
+          <span className="hidden md:inline-flex">
+            <LanguageSwitch locale={locale} label={t.nav.language} />
+          </span>
+          {session ? (
+            <Link href={`/${locale}/slips`} className="btn btn-primary hidden text-sm sm:inline-flex">
+              {t.nav.slips}
+            </Link>
+          ) : (
+            <>
+              <Link href={`/${locale}/login`} className="btn btn-ghost hidden text-sm sm:inline-flex">
+                {t.nav.login}
               </Link>
-            ))}
-            <div className="flex flex-wrap items-center gap-2 pt-2">
-              <LanguageSwitch locale={locale} label={t.nav.language} />
-              {authArea}
-            </div>
-          </div>
-        </MobileMenu>
+              <Link href={`/${locale}/signup`} className="btn btn-primary text-sm">
+                {t.nav.signup}
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );

@@ -1,29 +1,37 @@
 import Link from "next/link";
 import { resolveLocale } from "@/lib/locale";
 import { requireAdmin } from "@/lib/auth";
+import { adminNav, pendingPaymentsCount } from "@/lib/nav";
+import NavList from "@/components/nav/NavList";
+import AdminTabs from "@/components/nav/AdminTabs";
+import Icon from "@/components/nav/Icon";
 
 export default async function AdminLayout({ children, params }: LayoutProps<"/[locale]/admin">) {
   const { locale, t } = await resolveLocale(params);
   await requireAdmin(locale);
-  const base = `/${locale}/admin`;
-  const tabs = [
-    { href: base, label: t.admin.dashboard },
-    { href: `${base}/slips`, label: t.admin.slips },
-    { href: `${base}/payments`, label: t.admin.payments },
-    { href: `${base}/users`, label: t.admin.users },
-    { href: `${base}/settings`, label: t.admin.settings },
-  ];
+  const items = adminNav(locale, t, await pendingPaymentsCount());
+
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-border pb-4">
-        <span className="me-4 rounded-md bg-danger/15 px-2 py-1 text-xs font-black uppercase tracking-wider text-danger">{t.admin.title}</span>
-        {tabs.map((tab) => (
-          <Link key={tab.href} href={tab.href} className="rounded-lg px-3 py-1.5 text-sm text-muted hover:bg-surface hover:text-text">
-            {tab.label}
+    <div className="mx-auto max-w-6xl px-4 py-6 lg:flex lg:gap-8">
+      {/* Desktop: fixed left sidebar. Phones use the ☰ drawer plus the tab row below. */}
+      <aside className="hidden w-56 shrink-0 lg:block">
+        <div className="sticky top-20 rounded-2xl border border-danger/30 bg-surface p-3">
+          <p className="flex items-center gap-2 px-2 pb-3 pt-1 text-xs font-black uppercase tracking-wider text-danger">
+            <Icon name="shield" className="h-4 w-4" />
+            {t.nav.adminPanel}
+          </p>
+          <NavList items={items} />
+          <Link href={`/${locale}`} className="mt-3 flex items-center gap-2 border-t border-border px-3 pt-3 text-sm text-muted hover:text-text">
+            <Icon name="back" className="h-4 w-4 rtl:-scale-x-100" />
+            {t.admin.backToSite}
           </Link>
-        ))}
+        </div>
+      </aside>
+
+      <div className="min-w-0 flex-1">
+        <AdminTabs items={items} label={t.nav.adminPanel} />
+        {children}
       </div>
-      {children}
     </div>
   );
 }

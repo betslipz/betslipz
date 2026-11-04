@@ -14,6 +14,10 @@ export default async function ResultsPage({ params }: PageProps<"/[locale]/resul
     .order("settled_at", { ascending: false })
     .limit(60);
   const slips = (data ?? []) as Slip[];
+  // Screenshot-only slips need their image to show anything; storage RLS allows it once settled.
+  const paths = slips.filter((s) => s.slip_legs.length === 0 && s.image_path).map((s) => s.image_path as string);
+  const signed = paths.length ? ((await supabase.storage.from("slip-images").createSignedUrls(paths, 600)).data ?? []) : [];
+  const imageFor = (p: string | null) => signed.find((s) => s.path === p)?.signedUrl ?? undefined;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
@@ -24,7 +28,7 @@ export default async function ResultsPage({ params }: PageProps<"/[locale]/resul
       ) : (
         <div className="grid gap-5 md:grid-cols-2">
           {slips.map((s) => (
-            <SlipCard key={s.id} slip={s} locale={locale} t={t} compact />
+            <SlipCard key={s.id} slip={s} locale={locale} t={t} imageUrl={imageFor(s.image_path)} compact />
           ))}
         </div>
       )}

@@ -23,7 +23,12 @@ export default function LockedSlip({ teaser, locale, t, needsVip }: { teaser: Te
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-bg/40 p-4 text-center">
         <TierBadge tier={teaser.tier} t={t.common} />
         <p className="text-sm text-muted">
-          {teaser.legs} {teaser.legs === 1 ? t.common.leg : t.common.legs} · {t.common.totalOdds}{" "}
+          {teaser.legs > 0 && (
+            <>
+              {teaser.legs} {teaser.legs === 1 ? t.common.leg : t.common.legs} ·{" "}
+            </>
+          )}
+          {t.common.totalOdds}{" "}
           <b className="text-text" dir="ltr">
             {fmtOdds(teaser.total_odds)}
           </b>

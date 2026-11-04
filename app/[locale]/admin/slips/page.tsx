@@ -33,7 +33,7 @@ export default async function AdminSlips({ params }: PageProps<"/[locale]/admin/
               {scheduled && <span className="rounded bg-warning/15 px-2 py-0.5 text-xs font-bold text-warning">⏱ {fmtDate(s.publish_at, locale)}</span>}
               <b className="min-w-0 flex-1 truncate">{s.title_en}</b>
               <span className="text-sm text-muted" dir="ltr">
-                {s.slip_legs.length} × · {fmtOdds(s.total_odds)} · {s.confidence}%
+                {s.slip_legs.length ? `${s.slip_legs.length} ×` : "📷"} · {fmtOdds(s.total_odds)} · {s.confidence}%
               </span>
               <span className="text-xs text-muted">{fmtDate(s.publish_at, locale)}</span>
             </summary>
@@ -69,6 +69,9 @@ export default async function AdminSlips({ params }: PageProps<"/[locale]/admin/
                   <button className="btn btn-primary py-1.5 text-sm">{t.common.save}</button>
                   <Link href={`/${locale}/admin/slips/${s.id}`} className="btn btn-ghost py-1.5 text-sm">
                     {t.common.edit}
+                  </Link>
+                  <Link href={`/${locale}/admin/slips/new?from=${s.id}`} className="btn btn-ghost py-1.5 text-sm">
+                    ⧉ {t.admin.duplicate}
                   </Link>
                 </div>
               </form>
