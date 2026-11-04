@@ -35,7 +35,7 @@ export default function RevealSlip({
   const href = entitled ? `/${locale}/slips` : free ? `/${locale}/${session ? "slips" : "signup"}` : `/${locale}/subscribe${vip ? "?tier=vip" : ""}`;
 
   return (
-    <div className={`card relative rotate-1 overflow-hidden shadow-2xl shadow-accent/10 ${vip ? "border-vip/50" : ""}`}>
+    <div className={`card relative overflow-hidden shadow-2xl shadow-accent/10 ${vip ? "border-vip/50" : ""}`}>
       <div className="pointer-events-none select-none" aria-hidden>
         {featured?.preview ? (
           <div className="relative h-[420px]">
