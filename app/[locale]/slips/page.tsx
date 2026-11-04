@@ -49,7 +49,7 @@ export default async function SlipsPage({ params, searchParams }: PageProps<"/[l
   const activeSub = subs?.[0];
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
+    <div className="page-wrap py-10">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black">{t.slips.title}</h1>
@@ -108,7 +108,7 @@ export default async function SlipsPage({ params, searchParams }: PageProps<"/[l
       {slips.length === 0 && locked.length === 0 ? (
         <p className="card p-10 text-center text-muted">{t.slips.none}</p>
       ) : (
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {slips.map((s) =>
             giftIds.has(s.id) ? (
               <div key={s.id} className="relative">

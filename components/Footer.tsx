@@ -7,7 +7,7 @@ export default function Footer({ locale }: { locale: Locale }) {
   const t = getDictionary(locale);
   return (
     <footer className="mt-16 border-t border-border">
-      <div className="mx-auto max-w-6xl space-y-3 px-4 py-8 text-sm text-muted">
+      <div className="page-wrap space-y-3 py-8 text-sm text-muted">
         <Logo className="mb-5 h-8 opacity-90" />
         <div className="flex items-start gap-3">
           <span className="shrink-0 rounded-md border border-danger/60 px-2 py-0.5 text-xs font-bold text-danger">18+</span>

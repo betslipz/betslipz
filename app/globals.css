@@ -53,6 +53,24 @@ html[lang="ar"] body {
       radial-gradient(40rem 20rem at 90% 10%, color-mix(in oklab, var(--vip) 10%, transparent), transparent 70%);
   }
 
+  /* Page content width: uses the whole laptop screen, with side gutters that grow on wider screens. */
+  .page-wrap {
+    width: 100%;
+    max-width: 1920px;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 640px) {
+    .page-wrap {
+      padding-inline: 1.5rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .page-wrap {
+      padding-inline: 2.5rem;
+    }
+  }
+
   .card {
     background: var(--surface);
     border: 1px solid var(--border);

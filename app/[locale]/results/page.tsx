@@ -20,13 +20,13 @@ export default async function ResultsPage({ params }: PageProps<"/[locale]/resul
   const imageFor = (p: string | null) => signed.find((s) => s.path === p)?.signedUrl ?? undefined;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
+    <div className="page-wrap py-10">
       <h1 className="text-3xl font-black">{t.results.title}</h1>
       <p className="mb-8 mt-2 text-muted">{t.results.subtitle}</p>
       {slips.length === 0 ? (
         <p className="card p-8 text-center text-muted">{t.common.noData}</p>
       ) : (
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {slips.map((s) => (
             <SlipCard key={s.id} slip={s} locale={locale} t={t} imageUrl={imageFor(s.image_path)} compact />
           ))}

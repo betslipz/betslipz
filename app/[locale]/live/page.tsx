@@ -18,7 +18,7 @@ export default async function LivePage({ params, searchParams }: PageProps<"/[lo
   const name = t.live.sports[sport.key];
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
+    <div className="page-wrap py-10">
       <h1 className="flex items-center gap-3 text-3xl font-black">
         <span className="relative flex h-3 w-3">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-danger opacity-60" />

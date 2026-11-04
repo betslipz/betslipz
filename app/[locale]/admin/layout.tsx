@@ -12,7 +12,7 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
   const items = adminNav(locale, t, await pendingPaymentsCount());
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 lg:flex lg:gap-8">
+    <div className="page-wrap py-6 lg:flex lg:gap-8">
       {/* Desktop: fixed left sidebar. Phones use the ☰ drawer plus the tab row below. */}
       <aside className="hidden w-56 shrink-0 lg:block">
         <div className="sticky top-20 rounded-2xl border border-danger/30 bg-surface p-3">
