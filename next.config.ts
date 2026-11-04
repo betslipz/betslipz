@@ -11,6 +11,8 @@ const csp = [
   `img-src 'self' data: blob: ${supabaseUrl}`,
   "font-src 'self' data:",
   `connect-src 'self' ${supabaseUrl} ${supabaseUrl.replace("https://", "wss://")}${isDev ? " ws: http://localhost:*" : ""}`,
+  // Live scores page embeds the SoccersAPI scoreboard.
+  "frame-src https://ls.soccersapi.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

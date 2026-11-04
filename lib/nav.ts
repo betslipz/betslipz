@@ -12,6 +12,7 @@ export function siteNav(locale: Locale, t: Dictionary, session: Session | null):
   const items: NavItem[] = [
     { href: `/${locale}`, label: t.nav.home, icon: "home", exact: true },
     { href: `/${locale}/slips`, label: t.nav.slips, icon: "ticket" },
+    { href: `/${locale}/live`, label: t.nav.live, icon: "live" },
     { href: `/${locale}/results`, label: t.nav.results, icon: "trophy" },
     { href: `/${locale}#pricing`, label: t.nav.pricing, icon: "tag" },
     { href: `/${locale}/subscribe`, label: t.nav.subscribe, icon: "star" },

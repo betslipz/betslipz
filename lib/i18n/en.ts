@@ -10,6 +10,7 @@ const en = {
     home: "Home",
     slips: "Today's slips",
     results: "Results",
+    live: "Live scores",
     pricing: "Pricing",
     account: "My account",
     admin: "Admin",
@@ -108,6 +109,12 @@ const en = {
   results: {
     title: "Results",
     subtitle: "Every settled slip, won or lost. Today's open slips are for members only.",
+  },
+  live: {
+    title: "Live scores",
+    subtitle: "Follow today's games as they happen: scores, goals, cards and line-ups.",
+    hint: "Tap ⚙ in the scoreboard to switch to dark mode. Times are shown in your own time zone.",
+    credit: "Live data by SoccersAPI",
   },
   auth: {
     loginTitle: "Welcome back",

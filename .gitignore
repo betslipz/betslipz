@@ -44,3 +44,6 @@ next-env.d.ts
 .env*.local
 !.env.local.example
 .dev-accounts.txt
+
+# Local Netlify folder
+.netlify
