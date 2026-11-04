@@ -9,7 +9,8 @@
     "lint": "eslint",
     "seed:demo": "node scripts/seed-demo.mjs",
     "typecheck": "next typegen && tsc --noEmit",
-    "test:rls": "node scripts/test-rls.mjs"
+    "test:rls": "node scripts/test-rls.mjs",
+    "deploy": "git push origin main && git push origin main:live"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
