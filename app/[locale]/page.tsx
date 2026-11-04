@@ -7,22 +7,18 @@ import RevealSlip from "@/components/RevealSlip";
 import { featuredSlip } from "@/lib/featured";
 import { getSession } from "@/lib/auth";
 import { giftState } from "@/lib/gift";
-
-type Record = { won: number; lost: number; void: number; partial: number; avg_odds_won: number | null };
+import { trackRecord } from "@/lib/stats";
+import { InsightCards, WeekStrip } from "@/components/stats/StatsWidgets";
 
 export default async function Home({ params }: PageProps<"/[locale]">) {
   const { locale, t } = await resolveLocale(params);
   const supabase = await createClient();
-  const [{ data: plans }, { data: record }, featured, session] = await Promise.all([
+  const [{ data: plans }, record, featured, session] = await Promise.all([
     supabase.from("plans").select("*").eq("active", true).order("price_usd"),
-    supabase.rpc("track_record", { p_days: 30 }).single<Record>(),
+    trackRecord(),
     featuredSlip(),
     getSession(),
   ]);
-
-  const decided = (record?.won ?? 0) + (record?.lost ?? 0) + (record?.partial ?? 0);
-  const winRate = decided ? Math.round((((record?.won ?? 0) + (record?.partial ?? 0) * 0.5) / decided) * 100) : 0;
-  const settled = decided + (record?.void ?? 0);
 
   return (
     <>
@@ -49,20 +45,19 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       </section>
 
       <section className="page-wrap py-12">
-        <h2 className="mb-6 text-sm font-bold uppercase tracking-widest text-muted">{t.landing.statsTitle}</h2>
-        <div className="grid gap-4 sm:grid-cols-3">
-          {[
-            { label: t.landing.winRate, value: `${winRate}%`, accent: true },
-            { label: t.landing.settled, value: String(settled) },
-            { label: t.landing.avgOdds, value: record?.avg_odds_won ? Number(record.avg_odds_won).toFixed(2) : "—" },
-          ].map((s) => (
-            <div key={s.label} className="card p-5">
-              <p className="text-sm text-muted">{s.label}</p>
-              <p className={`mt-1 text-3xl font-black ${s.accent ? "text-accent" : ""}`} dir="ltr">
-                {s.value}
-              </p>
-            </div>
-          ))}
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-widest text-accent">{t.stats.homeKicker}</p>
+            <h2 className="mt-1 text-3xl font-black">{t.stats.insightsTitle}</h2>
+          </div>
+          <Link href={`/${locale}/results`} className="btn btn-ghost">
+            {t.stats.fullCalendar} <span className="inline-block rtl:rotate-180">→</span>
+          </Link>
+        </div>
+        <InsightCards record={record} locale={locale} t={t.stats} limit={4} />
+        <div className="card mt-4 p-4">
+          <p className="mb-3 text-sm font-semibold text-muted">{t.stats.last7}</p>
+          <WeekStrip record={record} locale={locale} t={t.stats} />
         </div>
       </section>
 
