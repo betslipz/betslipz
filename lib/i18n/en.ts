@@ -61,12 +61,20 @@ const en = {
     noData: "Nothing here yet.",
     error: "Something went wrong. Please try again.",
   },
+  welcome: {
+    title: "A welcome gift for you",
+    text: "Create a free account and see today's Regular slip, once, on us. No payment needed.",
+    cta: "Create my free account",
+    later: "Not now",
+  },
   landing: {
     todaySlip: "Today's slip",
     sampleSlip: "Sample slip",
     reveal: "Reveal",
     revealHint: "Subscribe to see every pick, the odds and our confidence.",
     viewSlip: "View today's slips",
+    revealFree: "Reveal free",
+    revealFreeHint: "Create a free account and see today's Regular slip once, as a welcome gift.",
     badge: "New slips every day",
     title: "Expert betting slips, with a confidence score on every pick.",
     subtitle:
@@ -144,6 +152,7 @@ const en = {
   auth: {
     loginTitle: "Welcome back",
     signupTitle: "Create your account",
+    signupGift: "🎁 New accounts get a one-time free look at today's Regular slip.",
     email: "Email",
     password: "Password",
     fullName: "Full name",
@@ -173,6 +182,13 @@ const en = {
     yourPlan: "Your plan",
     expires: "expires",
     archive: "Recent settled slips",
+    giftTitle: "🎁 Your welcome gift",
+    giftText: "See today's Regular slip for free, once, as a thank-you for joining. VIP slips aren't included.",
+    giftClaim: "Unlock today's Regular slip",
+    giftWait: "Your gift is saved. There's no Regular slip open right now, so come back when today's slip is posted.",
+    giftActive: "Welcome gift unlocked: here's today's Regular slip. Subscribe to get every slip, every day.",
+    giftError: "Something went wrong. Please try again.",
+    giftLabel: "Welcome gift",
   },
   subscribe: {
     title: "Subscribe",

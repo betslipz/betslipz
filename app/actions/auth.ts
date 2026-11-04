@@ -59,7 +59,7 @@ export async function signup(_: FormState, formData: FormData): Promise<FormStat
     },
   });
   if (error) return { error: error.message };
-  if (data.session) redirect(`/${locale}/subscribe`);
+  if (data.session) redirect(`/${locale}/slips`);
   return { message: t.auth.checkEmail };
 }
 

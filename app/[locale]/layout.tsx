@@ -7,6 +7,8 @@ import { getDictionary } from "@/lib/i18n";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AgeGate from "@/components/AgeGate";
+import WelcomeOffer from "@/components/WelcomeOffer";
+import { getSession } from "@/lib/auth";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 const cairo = Cairo({ variable: "--font-cairo", subsets: ["arabic", "latin"] });
@@ -27,6 +29,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const t = getDictionary(locale);
+  const session = await getSession();
 
   return (
     <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"} className={`${inter.variable} ${cairo.variable} antialiased`}>
@@ -35,6 +38,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
         <main className="flex-1">{children}</main>
         <Footer locale={locale} />
         <AgeGate t={t.age} />
+        {!session && <WelcomeOffer locale={locale} t={t.welcome} />}
       </body>
     </html>
   );

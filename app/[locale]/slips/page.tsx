@@ -6,10 +6,14 @@ import { SLIP_SELECT, type Slip } from "@/lib/types";
 import { fmtDate } from "@/lib/format";
 import SlipCard from "@/components/SlipCard";
 import LockedSlip, { type Teaser } from "@/components/LockedSlip";
+import { giftSlips, giftState } from "@/lib/gift";
+import { claimWelcomeGift } from "@/app/actions/gift";
 
-export default async function SlipsPage({ params }: PageProps<"/[locale]/slips">) {
+export default async function SlipsPage({ params, searchParams }: PageProps<"/[locale]/slips">) {
   const { locale, t } = await resolveLocale(params);
+  const { gift: giftNotice } = await searchParams;
   const session = await getSession();
+  const gift = giftState(session);
   const supabase = await createClient();
 
   // RLS decides which open slips come back; teasers carry no picks or confidence.
@@ -22,12 +26,25 @@ export default async function SlipsPage({ params }: PageProps<"/[locale]/slips">
   ]);
 
   const slips = (visible ?? []) as Slip[];
-  const visibleIds = new Set(slips.map((s) => s.id));
-  const locked = ((teasers ?? []) as Teaser[]).filter((x) => !visibleIds.has(x.id));
-
   const paths = slips.map((s) => s.image_path).filter((p): p is string => !!p);
   const signed = paths.length ? (await supabase.storage.from("slip-images").createSignedUrls(paths, 600)).data ?? [] : [];
-  const imageFor = (path: string | null) => signed.find((s) => s.path === path)?.signedUrl ?? null;
+  let imageFor = (path: string | null) => signed.find((s) => s.path === path)?.signedUrl ?? null;
+
+  // Welcome gift: today's Regular slip, shown on top of whatever RLS allows.
+  const giftIds = new Set<string>();
+  if (gift === "active" && session?.giftSlip) {
+    const g = await giftSlips(session.giftSlip);
+    for (const s of g.slips) {
+      if (!slips.some((x) => x.id === s.id)) slips.unshift(s);
+      giftIds.add(s.id);
+    }
+    const own = imageFor;
+    imageFor = (path) => own(path) ?? g.imageFor(path);
+  }
+
+  const visibleIds = new Set(slips.map((s) => s.id));
+  const locked = ((teasers ?? []) as Teaser[]).filter((x) => !visibleIds.has(x.id));
+  const giftReady = gift === "available" && locked.some((x) => x.tier === "regular");
 
   const activeSub = subs?.[0];
 
@@ -58,20 +75,52 @@ export default async function SlipsPage({ params }: PageProps<"/[locale]/slips">
         )}
       </div>
 
-      {!session?.tier && locked.length > 0 && (
-        <div className="card mb-6 border-accent/40 bg-accent/5 p-5">
-          <p className="font-bold">🔒 {t.slips.lockedTitle}</p>
-          <p className="mt-1 text-muted">{t.slips.lockedText}</p>
+      {giftNotice === "error" && <p className="card mb-6 border-danger/40 bg-danger/10 p-4 text-danger">{t.slips.giftError}</p>}
+
+      {gift === "available" ? (
+        <div className="card mb-6 border-vip/50 bg-vip/5 p-5">
+          <p className="text-lg font-black">{t.slips.giftTitle}</p>
+          <p className="mt-1 text-muted">{giftReady ? t.slips.giftText : t.slips.giftWait}</p>
+          {giftReady && (
+            <form action={claimWelcomeGift} className="mt-4">
+              <input type="hidden" name="locale" value={locale} />
+              <button className="btn btn-vip px-6">🎁 {t.slips.giftClaim}</button>
+            </form>
+          )}
         </div>
+      ) : gift === "active" ? (
+        <div className="card mb-6 border-vip/50 bg-vip/5 p-5">
+          <p className="font-bold">🎁 {t.slips.giftActive}</p>
+          <Link href={`/${locale}/subscribe`} className="btn btn-primary mt-4">
+            {t.slips.upgrade}
+          </Link>
+        </div>
+      ) : (
+        !session?.tier &&
+        locked.length > 0 && (
+          <div className="card mb-6 border-accent/40 bg-accent/5 p-5">
+            <p className="font-bold">🔒 {t.slips.lockedTitle}</p>
+            <p className="mt-1 text-muted">{t.slips.lockedText}</p>
+          </div>
+        )
       )}
 
       {slips.length === 0 && locked.length === 0 ? (
         <p className="card p-10 text-center text-muted">{t.slips.none}</p>
       ) : (
         <div className="grid gap-5 md:grid-cols-2">
-          {slips.map((s) => (
-            <SlipCard key={s.id} slip={s} locale={locale} t={t} imageUrl={imageFor(s.image_path)} />
-          ))}
+          {slips.map((s) =>
+            giftIds.has(s.id) ? (
+              <div key={s.id} className="relative">
+                <span className="absolute -top-3 start-4 z-10 rounded-full bg-vip px-3 py-1 text-xs font-black text-[#1a1200] shadow">
+                  🎁 {t.slips.giftLabel}
+                </span>
+                <SlipCard slip={s} locale={locale} t={t} imageUrl={imageFor(s.image_path)} />
+              </div>
+            ) : (
+              <SlipCard key={s.id} slip={s} locale={locale} t={t} imageUrl={imageFor(s.image_path)} />
+            ),
+          )}
           {locked.map((x) => (
             <LockedSlip key={x.id} teaser={x} locale={locale} t={t} needsVip={x.tier === "vip"} />
           ))}

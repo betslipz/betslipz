@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Locale } from "@/lib/config";
 import type { Dictionary } from "@/lib/i18n/en";
 import type { Session } from "@/lib/auth";
+import type { GiftState } from "@/lib/gift";
 import type { Teaser } from "./LockedSlip";
 import { fmtOdds } from "@/lib/format";
 import { TierBadge } from "./StatusBadge";
@@ -13,19 +14,25 @@ import ConfidenceMeter from "./ConfidenceMeter";
 export default function RevealSlip({
   featured,
   session,
+  gift,
   locale,
   t,
 }: {
   featured: { teaser: Teaser; preview: string | null } | null;
   session: Session | null;
+  gift: GiftState;
   locale: Locale;
   t: Dictionary;
 }) {
   const teaser = featured?.teaser;
   const vip = teaser?.tier === "vip";
   const entitled =
-    !!session && !!teaser && (session.role === "admin" || session.tier === "vip" || (session.tier === "regular" && !vip));
-  const href = entitled ? `/${locale}/slips` : `/${locale}/subscribe${vip ? "?tier=vip" : ""}`;
+    !!session &&
+    !!teaser &&
+    (session.role === "admin" || session.tier === "vip" || (!vip && (session.tier === "regular" || gift === "active")));
+  // Regular slips can be revealed free once with the welcome gift: guests sign up, new accounts claim it on Today's slips.
+  const free = !!teaser && !vip && !entitled && (!session || gift === "available");
+  const href = entitled ? `/${locale}/slips` : free ? `/${locale}/${session ? "slips" : "signup"}` : `/${locale}/subscribe${vip ? "?tier=vip" : ""}`;
 
   return (
     <div className={`card relative rotate-1 overflow-hidden shadow-2xl shadow-accent/10 ${vip ? "border-vip/50" : ""}`}>
@@ -83,10 +90,10 @@ export default function RevealSlip({
         <span className="text-4xl" aria-hidden>
           {entitled ? "🔓" : "🔒"}
         </span>
-        <Link href={href} className={`btn ${vip ? "btn-vip" : "btn-primary"} px-8 py-3 text-lg font-black shadow-lg`}>
-          {entitled ? t.landing.viewSlip : t.landing.reveal}
+        <Link href={href} className={`btn ${vip || free ? "btn-vip" : "btn-primary"} px-8 py-3 text-lg font-black shadow-lg`}>
+          {entitled ? t.landing.viewSlip : free ? `🎁 ${t.landing.revealFree}` : t.landing.reveal}
         </Link>
-        {!entitled && <p className="max-w-xs text-sm text-muted">{t.landing.revealHint}</p>}
+        {!entitled && <p className="max-w-xs text-sm text-muted">{free ? t.landing.revealFreeHint : t.landing.revealHint}</p>}
       </div>
     </div>
   );

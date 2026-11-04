@@ -24,6 +24,7 @@ export default function AgeGate({ t }: { t: Dictionary["age"] }) {
             onClick={() => {
               document.cookie = "age_ok=1; path=/; max-age=31536000; samesite=lax";
               setShow(false);
+              window.dispatchEvent(new Event("age-ok")); // lets the welcome offer appear next
             }}
           >
             {t.yes}

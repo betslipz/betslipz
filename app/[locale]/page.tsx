@@ -6,6 +6,7 @@ import PlanCards from "@/components/PlanCards";
 import RevealSlip from "@/components/RevealSlip";
 import { featuredSlip } from "@/lib/featured";
 import { getSession } from "@/lib/auth";
+import { giftState } from "@/lib/gift";
 
 type Record = { won: number; lost: number; void: number; partial: number; avg_odds_won: number | null };
 
@@ -43,7 +44,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             </div>
           </div>
 
-          <RevealSlip featured={featured} session={session} locale={locale} t={t} />
+          <RevealSlip featured={featured} session={session} gift={giftState(session)} locale={locale} t={t} />
         </div>
       </section>
 

@@ -13,6 +13,8 @@ export type Session = {
   role: "user" | "admin";
   banned: boolean;
   tier: Tier | null;
+  giftDay: string | null; // day the welcome gift was claimed (see lib/gift.ts)
+  giftSlip: string | null; // the one slip it unlocked
 };
 
 // One lookup per request: who is this, and what can they see?
@@ -35,6 +37,8 @@ export const getSession = cache(async (): Promise<Session | null> => {
     role: profile?.role === "admin" ? "admin" : "user",
     banned: profile?.banned ?? false,
     tier: (tier as Tier | null) ?? null,
+    giftDay: typeof user.app_metadata?.welcome_gift_day === "string" ? user.app_metadata.welcome_gift_day : null,
+    giftSlip: typeof user.app_metadata?.welcome_gift_slip === "string" ? user.app_metadata.welcome_gift_slip : null,
   };
 });
 
