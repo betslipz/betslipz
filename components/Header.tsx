@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Locale } from "@/lib/config";
 import { getDictionary } from "@/lib/i18n";
 import { getSession } from "@/lib/auth";
-import { adminNav, pendingPaymentsCount, siteNav } from "@/lib/nav";
+import { pendingPaymentsCount, siteNav } from "@/lib/nav";
 import Logo from "./Logo";
 import LanguageSwitch from "./LanguageSwitch";
 import SideMenu from "./nav/SideMenu";
@@ -24,7 +24,6 @@ export default async function Header({ locale }: { locale: Locale }) {
             menu: t.nav.menu,
             close: t.nav.close,
             browse: t.nav.browse,
-            adminPanel: t.nav.adminPanel,
             language: t.nav.language,
             login: t.nav.login,
             signup: t.nav.signup,
@@ -34,8 +33,7 @@ export default async function Header({ locale }: { locale: Locale }) {
             admin: t.nav.admin,
           }}
           user={session ? { name: session.fullName ?? "", email: session.email, tierLabel, vip: session.tier === "vip", admin: isAdmin } : null}
-          siteItems={siteNav(locale, t, session)}
-          adminItems={isAdmin ? adminNav(locale, t, pending) : null}
+          items={siteNav(locale, t, session, pending)}
         />
         <Link href={`/${locale}`} aria-label={t.nav.home}>
           <Logo />

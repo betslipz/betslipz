@@ -62,6 +62,11 @@ const en = {
     error: "Something went wrong. Please try again.",
   },
   landing: {
+    todaySlip: "Today's slip",
+    sampleSlip: "Sample slip",
+    reveal: "Reveal",
+    revealHint: "Subscribe to see every pick, the odds and our confidence.",
+    viewSlip: "View today's slips",
     badge: "New slips every day",
     title: "Expert betting slips, with a confidence score on every pick.",
     subtitle:

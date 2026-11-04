@@ -3,16 +3,20 @@ import { resolveLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import type { Plan } from "@/lib/types";
 import PlanCards from "@/components/PlanCards";
-import ConfidenceMeter from "@/components/ConfidenceMeter";
+import RevealSlip from "@/components/RevealSlip";
+import { featuredSlip } from "@/lib/featured";
+import { getSession } from "@/lib/auth";
 
 type Record = { won: number; lost: number; void: number; partial: number; avg_odds_won: number | null };
 
 export default async function Home({ params }: PageProps<"/[locale]">) {
   const { locale, t } = await resolveLocale(params);
   const supabase = await createClient();
-  const [{ data: plans }, { data: record }] = await Promise.all([
+  const [{ data: plans }, { data: record }, featured, session] = await Promise.all([
     supabase.from("plans").select("*").eq("active", true).order("price_usd"),
     supabase.rpc("track_record", { p_days: 30 }).single<Record>(),
+    featuredSlip(),
+    getSession(),
   ]);
 
   const decided = (record?.won ?? 0) + (record?.lost ?? 0) + (record?.partial ?? 0);
@@ -39,26 +43,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
             </div>
           </div>
 
-          {/* Illustrative slip: shows the product without revealing a real pick */}
-          <div className="card rotate-1 p-5 shadow-2xl shadow-accent/10" aria-hidden>
-            <div className="flex items-center justify-between">
-              <span className="rounded-md bg-vip px-2 py-0.5 text-xs font-black text-[#1a1200]">★ VIP</span>
-              <ConfidenceMeter value={82} label={t.common.confidence} size={64} />
-            </div>
-            {["Team A vs Team B", "Team C vs Team D", "Team E vs Team F"].map((m, i) => (
-              <div key={m} className="mt-3 flex items-center justify-between border-t border-border pt-3">
-                <div>
-                  <p className="font-semibold" dir="ltr">{m}</p>
-                  <p className="text-sm text-muted">{["1X2 · Home", "BTTS · Yes", "Over 2.5"][i]}</p>
-                </div>
-                <span className="rounded-md bg-surface-2 px-2 py-1 font-mono text-sm font-bold">{["1.65", "1.80", "1.72"][i]}</span>
-              </div>
-            ))}
-            <div className="mt-4 flex justify-between border-t border-border pt-3 text-sm">
-              <span className="text-muted">{t.common.totalOdds}</span>
-              <b className="text-accent">5.11</b>
-            </div>
-          </div>
+          <RevealSlip featured={featured} session={session} locale={locale} t={t} />
         </div>
       </section>
 

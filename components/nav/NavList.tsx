@@ -25,7 +25,9 @@ export default function NavList({ items, onNavigate }: { items: NavItem[]; onNav
               className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${
                 item.primary
                   ? "mb-2 bg-accent text-[#04130a] hover:brightness-110"
-                  : active
+                  : item.danger
+                    ? `mt-2 border border-danger/30 text-danger ${active ? "bg-danger/15" : "bg-danger/5 hover:bg-danger/10"}`
+                    : active
                     ? "bg-accent/15 text-accent"
                     : "text-muted hover:bg-surface-2 hover:text-text"
               }`}

@@ -6,9 +6,10 @@ import type { Session } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import type { IconName } from "@/components/nav/Icon";
 
-export type NavItem = { href: string; label: string; icon: IconName; badge?: number; exact?: boolean; primary?: boolean };
+export type NavItem = { href: string; label: string; icon: IconName; badge?: number; exact?: boolean; primary?: boolean; danger?: boolean };
 
-export function siteNav(locale: Locale, t: Dictionary, session: Session | null): NavItem[] {
+// pending: payments awaiting review, shown as a badge on the Admin panel item (admins only).
+export function siteNav(locale: Locale, t: Dictionary, session: Session | null, pending = 0): NavItem[] {
   const items: NavItem[] = [
     { href: `/${locale}`, label: t.nav.home, icon: "home", exact: true },
     { href: `/${locale}/slips`, label: t.nav.slips, icon: "ticket" },
@@ -18,6 +19,7 @@ export function siteNav(locale: Locale, t: Dictionary, session: Session | null):
     { href: `/${locale}/subscribe`, label: t.nav.subscribe, icon: "star" },
   ];
   if (session) items.push({ href: `/${locale}/account`, label: t.nav.account, icon: "user" });
+  if (session?.role === "admin") items.push({ href: `/${locale}/admin`, label: t.nav.adminPanel, icon: "shield", badge: pending, danger: true });
   return items;
 }
 

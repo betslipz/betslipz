@@ -60,7 +60,9 @@ export default async function LivePage({ params, searchParams }: PageProps<"/[lo
               title={`${t.live.title}: ${name}`}
               referrerPolicy="strict-origin-when-cross-origin"
               sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-              className="block h-[80vh] min-h-[640px] w-full bg-surface-2"
+              // The scoreboard can't report its height, so the frame is taller than a full day's list (~6,000px desktop,
+              // ~6,600px phone) and the page scrolls instead of the frame.
+              className="block h-[7400px] w-full bg-surface-2 md:h-[6600px]"
             />
           </div>
           <p className="mt-3 text-xs text-muted">{t.live.credit}</p>

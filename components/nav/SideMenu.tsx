@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import type { Locale } from "@/lib/config";
 import type { NavItem } from "@/lib/nav";
 import { logout } from "@/app/actions/auth";
@@ -16,7 +15,6 @@ type Labels = {
   menu: string;
   close: string;
   browse: string;
-  adminPanel: string;
   language: string;
   login: string;
   signup: string;
@@ -38,19 +36,15 @@ export default function SideMenu({
   locale,
   labels,
   user,
-  siteItems,
-  adminItems,
+  items,
 }: {
   locale: Locale;
   labels: Labels;
   user: MenuUser | null;
-  siteItems: NavItem[];
-  adminItems: NavItem[] | null;
+  items: NavItem[];
 }) {
   const [open, setOpen] = useState(false);
-  const pathname = usePathname();
-  const inAdmin = pathname.startsWith(`/${locale}/admin`);
-  const pending = adminItems?.reduce((n, i) => n + (i.badge ?? 0), 0) ?? 0;
+  const pending = items.reduce((n, i) => n + (i.badge ?? 0), 0);
 
   useEffect(() => {
     if (!open) return;
@@ -64,21 +58,12 @@ export default function SideMenu({
   }, [open]);
 
   const close = () => setOpen(false);
-  const adminSection = adminItems && (
-    <section className="rounded-xl border border-danger/30 bg-danger/5 p-2">
-      <p className="flex items-center gap-2 px-2 pb-2 pt-1 text-xs font-black uppercase tracking-wider text-danger">
-        <Icon name="shield" className="h-4 w-4" />
-        {labels.adminPanel}
-      </p>
-      <NavList items={adminItems} onNavigate={close} />
-    </section>
-  );
   const siteSection = (
     <section>
       <p className="px-3 pb-2 text-xs font-bold uppercase tracking-wider text-muted">
         {labels.browse}
       </p>
-      <NavList items={siteItems} onNavigate={close} />
+      <NavList items={items} onNavigate={close} />
     </section>
   );
 
@@ -177,17 +162,7 @@ export default function SideMenu({
               </div>
 
               <nav className="flex-1 space-y-5 overflow-y-auto p-3">
-                {inAdmin ? (
-                  <>
-                    {adminSection}
-                    {siteSection}
-                  </>
-                ) : (
-                  <>
-                    {siteSection}
-                    {adminSection}
-                  </>
-                )}
+                {siteSection}
               </nav>
 
               <div className="flex items-center gap-2 border-t border-border p-3">
