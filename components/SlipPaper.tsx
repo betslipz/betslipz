@@ -3,6 +3,8 @@ import type { Locale } from "@/lib/config";
 import type { Dictionary } from "@/lib/i18n/en";
 import type { SlipLeg, SlipStatus } from "@/lib/types";
 import { fmtDate, fmtOdds } from "@/lib/format";
+import type { TeamLookup } from "@/lib/team-images";
+import TeamBadge from "./TeamBadge";
 
 // The ticket itself, laid out like a sportsbook bet slip: status banner, one row per pick, totals table.
 // Shared by slip cards and the blurred home teaser, so both look the same.
@@ -37,6 +39,7 @@ export default function SlipPaper({
   locale,
   t,
   children,
+  teams,
 }: {
   status: SlipStatus;
   legs: Leg[];
@@ -46,6 +49,7 @@ export default function SlipPaper({
   locale: Locale;
   t: Dictionary["common"];
   children?: ReactNode; // shown instead of the pick rows, e.g. an uploaded screenshot
+  teams?: TeamLookup; // crests/flags next to team names
 }) {
   const units = (n: number) => `${Number(n.toFixed(2))} ${n === 1 ? t.unit : t.units}`;
   const rows = [
@@ -82,9 +86,21 @@ export default function SlipPaper({
                   <span dir="ltr">{fmtOdds(leg.odds)}</span>
                 </div>
                 <div className="flex items-baseline justify-between gap-3">
-                  <span className="min-w-0" dir="auto">
-                    {leg.event.replace(/\s+vs\.?\s+/i, " - ")}
-                  </span>
+                  {teams ? (
+                    <span className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                      {leg.event.split(/\s+vs\.?\s+/i).map((name, j) => (
+                        <span key={j} className="flex items-center gap-1">
+                          {j > 0 && <span className="text-slip-ink/50">-</span>}
+                          <TeamBadge team={teams(name)} name={name} size={16} />
+                          <span dir="auto">{name}</span>
+                        </span>
+                      ))}
+                    </span>
+                  ) : (
+                    <span className="min-w-0" dir="auto">
+                      {leg.event.replace(/\s+vs\.?\s+/i, " - ")}
+                    </span>
+                  )}
                   {leg.kickoff_at && (
                     <span className="shrink-0">
                       {fmtDate(leg.kickoff_at, locale)}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import type { Locale } from "@/lib/config";
 import type { Dictionary } from "@/lib/i18n/en";
 import type { Prediction } from "@/lib/types";
@@ -9,6 +9,8 @@ import { savePrediction } from "@/app/actions/admin";
 import { FormMessage, Submit } from "@/components/AuthForms";
 import ConfidenceMeter from "@/components/ConfidenceMeter";
 import { MARKETS, OTHER, chip, joinEvent, splitEvent, toIso, toLocalInput } from "./form-helpers";
+import TeamPicker from "./TeamPicker";
+import type { Team } from "@/lib/team-images";
 
 // Tennis and darts are player against player; football and basketball are team against team.
 const isDuel = (sport: Sport) => sport === "tennis" || sport === "darts";
@@ -18,7 +20,7 @@ export default function PredictionForm({
   t,
   prediction,
   initialSport,
-  names,
+  teams,
 }: {
   locale: Locale;
   t: Dictionary;
@@ -26,8 +28,8 @@ export default function PredictionForm({
   prediction?: Prediction;
   /** "Save and add another" keeps the sport of the last one. */
   initialSport?: Sport;
-  /** Team and player names used before, offered as suggestions. */
-  names: string[];
+  /** Teams and players of every sport, with crest or flag; the picker shows the chosen sport's. */
+  teams: Team[];
 }) {
   const [state, action] = useActionState(savePrediction, undefined);
   const [sport, setSport] = useState<Sport>(prediction?.sport ?? initialSport ?? "football");
@@ -45,6 +47,7 @@ export default function PredictionForm({
 
   const picks = markets.find((m) => m.name === market)?.picks(home.trim(), away.trim()) ?? [];
   const duel = isDuel(sport);
+  const sportTeams = useMemo(() => teams.filter((x) => x.sport === sport), [teams, sport]);
   const changeSport = (s: Sport) => {
     setSport(s);
     setMarket(MARKETS[s][0].name);
@@ -79,15 +82,10 @@ export default function PredictionForm({
 
       {/* 2. The game */}
       <div className="card space-y-4 p-5">
-        <datalist id="names">
-          {names.map((n) => (
-            <option key={n} value={n} />
-          ))}
-        </datalist>
         <div className="grid gap-2 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
-          <input className="input" list="names" placeholder={duel ? t.admin.player1 : t.admin.home} value={home} onChange={(e) => setHome(e.target.value)} required />
+          <TeamPicker teams={sportTeams} value={home} onChange={setHome} placeholder={duel ? t.admin.player1 : t.admin.home} noMatch={t.admin.teamNotListed} required />
           <span className="hidden text-xs font-bold text-muted sm:block">vs</span>
-          <input className="input" list="names" placeholder={duel ? t.admin.player2 : t.admin.away} value={away} onChange={(e) => setAway(e.target.value)} required />
+          <TeamPicker teams={sportTeams} value={away} onChange={setAway} placeholder={duel ? t.admin.player2 : t.admin.away} noMatch={t.admin.teamNotListed} required />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>

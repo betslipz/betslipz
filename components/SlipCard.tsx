@@ -5,6 +5,7 @@ import type { Slip } from "@/lib/types";
 import ConfidenceMeter from "./ConfidenceMeter";
 import SlipPaper from "./SlipPaper";
 import ProtectedImage from "./ProtectedImage";
+import { teamLookup } from "@/lib/teams";
 
 export default async function SlipCard({
   slip,
@@ -25,7 +26,7 @@ export default async function SlipCard({
   // Screenshot-only slips have no typed picks: the image takes their place.
   const imageOnly = legs.length === 0 && !!imageUrl;
   // Tiled across slip screenshots, so a leaked picture points back to the account it came from.
-  const viewer = imageUrl ? await getSession() : null;
+  const [viewer, teams] = await Promise.all([imageUrl ? getSession() : null, teamLookup()]);
   const watermark = viewer ? `${viewer.email} · ${new Date().toISOString().slice(0, 10)}` : SITE_NAME;
 
   return (
@@ -43,6 +44,7 @@ export default async function SlipCard({
         stakeUnits={slip.stake_units}
         locale={locale}
         t={t.common}
+        teams={teams}
       >
         {imageOnly ? (
           <div className="border-t border-slip-line bg-slip-row p-2">

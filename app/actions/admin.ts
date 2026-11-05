@@ -205,6 +205,49 @@ export async function deletePrediction(formData: FormData) {
   revalidatePath(`/${locale}/admin/predictions`);
 }
 
+// Teams and players for the pickers. A logo upload goes into the public team-logos bucket.
+export async function saveTeam(_: FormState, formData: FormData): Promise<FormState> {
+  const { locale, supabase } = await adminContext(formData);
+  const parsed = z
+    .object({
+      sport: z.enum(PREDICTION_SPORTS),
+      name: z.string().trim().min(1).max(80),
+      country: z.union([z.literal(""), z.string().trim().toLowerCase().regex(/^[a-z]{2}(-[a-z]{3})?$/)]),
+      league: z.string().trim().max(80),
+    })
+    .safeParse({ sport: formData.get("sport"), name: formData.get("name"), country: formData.get("country") ?? "", league: formData.get("league") ?? "" });
+  if (!parsed.success) return { error: "Check the name and the country code (two letters, e.g. lb, fr, gb-eng)." };
+
+  let logo_url: string | undefined;
+  const file = formData.get("logo");
+  if (file instanceof File && file.size > 0) {
+    const ext = IMAGE_TYPES[file.type];
+    if (!ext || file.size > 500 * 1024) return { error: "Logo must be PNG/JPG/WEBP, max 500KB" };
+    const path = `custom/${randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("team-logos").upload(path, file, { contentType: file.type });
+    if (error) return { error: error.message };
+    logo_url = supabase.storage.from("team-logos").getPublicUrl(path).data.publicUrl;
+  }
+
+  const { sport, name, country, league } = parsed.data;
+  const { error } = await supabase
+    .from("teams")
+    .upsert(
+      { sport, name, country: country || null, league: league || null, is_player: sport === "tennis" || sport === "darts", ...(logo_url ? { logo_url } : {}) },
+      { onConflict: "sport,name" },
+    );
+  if (error) return { error: error.message };
+  revalidatePath(`/${locale}/admin/teams`);
+  return { message: `Saved ${name}.` };
+}
+
+export async function deleteTeam(formData: FormData) {
+  const { locale, supabase } = await adminContext(formData);
+  const id = z.string().uuid().parse(formData.get("id"));
+  await supabase.from("teams").delete().eq("id", id);
+  revalidatePath(`/${locale}/admin/teams`);
+}
+
 export async function approvePayment(formData: FormData) {
   const { locale, supabase } = await adminContext(formData);
   const id = z.string().uuid().parse(formData.get("id"));

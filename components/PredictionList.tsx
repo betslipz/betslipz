@@ -5,6 +5,9 @@ import { sportEmoji } from "@/lib/sports";
 import { addDays, dayKey } from "@/lib/stats";
 import { fmtDay, fmtOdds } from "@/lib/format";
 import { confidenceColor } from "./ConfidenceMeter";
+import TeamBadge from "./TeamBadge";
+import { teamLookup } from "@/lib/teams";
+import type { TeamLookup } from "@/lib/team-images";
 
 // Predictions as a table: one row per game (time · teams · tip · odds · confidence), grouped by day.
 // Rows with analysis open on tap to show it.
@@ -23,7 +26,7 @@ const resultStyle: Record<SlipStatus, { row: string; tip: string; icon: string }
 
 const timeFmt = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Beirut" });
 
-export default function PredictionList({
+export default async function PredictionList({
   predictions,
   locale,
   t,
@@ -36,6 +39,7 @@ export default function PredictionList({
   showSport?: boolean;
 }) {
   const today = dayKey(new Date());
+  const teams = await teamLookup();
   const dayLabel = (key: string) =>
     key === today
       ? t.stats.today
@@ -67,7 +71,7 @@ export default function PredictionList({
           </div>
           <ul className="space-y-2">
             {g.rows.map((p) => (
-              <Row key={p.id} p={p} locale={locale} t={t} showSport={showSport} />
+              <Row key={p.id} p={p} locale={locale} t={t} showSport={showSport} teams={teams} />
             ))}
           </ul>
         </section>
@@ -76,7 +80,7 @@ export default function PredictionList({
   );
 }
 
-function Row({ p, locale, t, showSport }: { p: Prediction; locale: Locale; t: Dictionary; showSport: boolean }) {
+function Row({ p, locale, t, showSport, teams }: { p: Prediction; locale: Locale; t: Dictionary; showSport: boolean; teams: TeamLookup }) {
   const [home, ...rest] = p.event.split(/\s+vs\.?\s+/i);
   const away = rest.join(" vs ");
   const notes = (locale === "ar" && p.notes_ar) || p.notes_en;
@@ -95,14 +99,14 @@ function Row({ p, locale, t, showSport }: { p: Prediction; locale: Locale; t: Di
             {p.competition || t.live.sports[p.sport]}
           </span>
         )}
-        <span className="block truncate text-sm font-semibold leading-snug sm:text-base" dir="auto">
-          {home}
-        </span>
-        {away && (
-          <span className="block truncate text-sm font-semibold leading-snug sm:text-base" dir="auto">
-            {away}
+        {[home, away].filter(Boolean).map((name) => (
+          <span key={name} className="flex min-w-0 items-center gap-1.5 py-px">
+            <TeamBadge team={teams(name, p.sport)} name={name} size={18} />
+            <span className="truncate text-sm font-semibold leading-snug sm:text-base" dir="auto">
+              {name}
+            </span>
           </span>
-        )}
+        ))}
       </span>
       <span className="min-w-0">
         <b className={`block break-words text-sm leading-snug sm:text-base ${style.tip}`} dir="auto">

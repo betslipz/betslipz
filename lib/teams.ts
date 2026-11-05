@@ -1,5 +1,8 @@
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { lookupFrom, type Team } from "@/lib/team-images";
+import type { Sport } from "@/lib/sports";
 
 function namesFrom(events: { event: string }[]) {
   const names = new Set<string>();
@@ -12,16 +15,32 @@ function namesFrom(events: { event: string }[]) {
   return [...names].sort((a, b) => a.localeCompare(b));
 }
 
-// Team names from recent slips ("Home vs Away"), offered as suggestions in the slip form.
-export async function knownTeams() {
+// Every team and player with their crest/flag (a few hundred rows), once per request.
+export const allTeams = cache(async (): Promise<Team[]> => {
   const supabase = await createClient();
-  const { data } = await supabase.from("slip_legs").select("event").limit(600);
-  return namesFrom(data ?? []);
-}
+  const { data } = await supabase.from("teams").select("id, sport, name, country, logo_url, league, is_player").order("name").limit(5000);
+  return (data ?? []) as Team[];
+});
 
-// Team and player names from earlier predictions, offered as suggestions in the prediction form.
-export async function knownNames() {
+export const teamLookup = cache(async () => lookupFrom(await allTeams()));
+
+// Picker options: the teams list plus names typed in earlier slips and predictions that aren't in it yet (shown without a crest).
+export async function pickerTeams(): Promise<Team[]> {
   const supabase = await createClient();
-  const { data } = await supabase.from("predictions").select("event").order("created_at", { ascending: false }).limit(600);
-  return namesFrom(data ?? []);
+  const [teams, { data: legs }, { data: predictions }] = await Promise.all([
+    allTeams(),
+    supabase.from("slip_legs").select("event").limit(600),
+    supabase.from("predictions").select("event, sport").limit(600),
+  ]);
+  const lookup = lookupFrom(teams);
+  const extra = new Map<string, Team>();
+  const add = (names: string[], sport: Sport) => {
+    for (const name of names) {
+      if (lookup(name, sport) || extra.has(`${sport}:${name}`)) continue;
+      extra.set(`${sport}:${name}`, { id: `typed:${sport}:${name}`, sport, name, country: null, logo_url: null, league: null, is_player: false });
+    }
+  };
+  add(namesFrom(legs ?? []), "football");
+  for (const p of (predictions ?? []) as { event: string; sport: Sport }[]) add(namesFrom([p]), p.sport);
+  return [...teams, ...extra.values()];
 }

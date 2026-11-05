@@ -32,6 +32,7 @@ export function adminNav(locale: Locale, t: Dictionary, pending: number): NavIte
     { href: base, label: t.admin.dashboard, icon: "grid", exact: true },
     { href: `${base}/predictions`, label: t.admin.predictions, icon: "target", exact: true },
     { href: `${base}/slips`, label: t.admin.slips, icon: "list", exact: true },
+    { href: `${base}/teams`, label: t.admin.teams, icon: "users" },
     { href: `${base}/payments`, label: t.admin.payments, icon: "wallet", badge: pending },
     { href: `${base}/users`, label: t.admin.users, icon: "users" },
     { href: `${base}/settings`, label: t.admin.settings, icon: "sliders" },

@@ -8,6 +8,8 @@ import { saveSlip } from "@/app/actions/admin";
 import { FormMessage, Submit } from "@/components/AuthForms";
 import ConfidenceMeter from "@/components/ConfidenceMeter";
 import { MARKETS as SPORT_MARKETS, OTHER, chip, joinEvent, splitEvent, toIso, toLocalInput } from "./form-helpers";
+import TeamPicker from "./TeamPicker";
+import type { Team } from "@/lib/team-images";
 
 type LegDraft = { home: string; away: string; market: string; customMarket: string; pick: string; odds: string; kickoff: string };
 type Mode = "typed" | "image";
@@ -53,8 +55,8 @@ export default function SlipForm({
   slip?: Slip;
   /** "Duplicate": prefill from another slip but save as a new one. */
   template?: Slip;
-  /** Team names from earlier slips, offered as suggestions. */
-  teams: string[];
+  /** Teams and players with crest or flag, offered as you type. */
+  teams: Team[];
   tAr: Dictionary["admin"]["slipNames"];
   tEn: Dictionary["admin"]["slipNames"];
 }) {
@@ -149,11 +151,6 @@ export default function SlipForm({
               {t.common.totalOdds}: <b className="text-lg text-accent" dir="ltr">{total.toFixed(2)}</b>
             </span>
           </div>
-          <datalist id="teams">
-            {teams.map((name) => (
-              <option key={name} value={name} />
-            ))}
-          </datalist>
           <div className="space-y-3">
             {legs.map((leg, i) => {
               const preset = MARKETS.find((m) => m.name === leg.market);
@@ -164,19 +161,19 @@ export default function SlipForm({
                     <span className="mt-2 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-surface-2 text-xs font-bold sm:mt-0">{i + 1}</span>
                     {/* Stacked on phones, side by side from sm up. */}
                     <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
-                      <input
-                        ref={(el) => {
+                      <TeamPicker
+                        teams={teams}
+                        inputRef={(el) => {
                           homeRefs.current[i] = el;
                         }}
-                        className="input min-w-0"
-                        list="teams"
                         placeholder={t.admin.home}
                         value={leg.home}
-                        onChange={(e) => update(i, { home: e.target.value })}
+                        onChange={(name) => update(i, { home: name })}
+                        noMatch={t.admin.teamNotListed}
                         required
                       />
                       <span className="hidden text-xs font-bold text-muted sm:block">vs</span>
-                      <input className="input min-w-0" list="teams" placeholder={t.admin.away} value={leg.away} onChange={(e) => update(i, { away: e.target.value })} />
+                      <TeamPicker teams={teams} placeholder={t.admin.away} value={leg.away} onChange={(name) => update(i, { away: name })} noMatch={t.admin.teamNotListed} />
                     </div>
                     <button
                       type="button"

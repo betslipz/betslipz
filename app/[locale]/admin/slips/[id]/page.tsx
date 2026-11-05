@@ -3,7 +3,7 @@ import { resolveLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { getDictionary } from "@/lib/i18n";
 import { SLIP_SELECT, type Slip } from "@/lib/types";
-import { knownTeams } from "@/lib/teams";
+import { pickerTeams } from "@/lib/teams";
 import SlipForm from "@/components/admin/SlipForm";
 
 export default async function EditSlip({ params }: PageProps<"/[locale]/admin/slips/[id]">) {
@@ -19,7 +19,7 @@ export default async function EditSlip({ params }: PageProps<"/[locale]/admin/sl
         locale={locale}
         t={t}
         slip={data as Slip}
-        teams={await knownTeams()}
+        teams={await pickerTeams()}
         tEn={getDictionary("en").admin.slipNames}
         tAr={getDictionary("ar").admin.slipNames}
       />
