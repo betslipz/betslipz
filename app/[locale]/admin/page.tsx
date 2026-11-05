@@ -2,6 +2,8 @@ import Link from "next/link";
 import { resolveLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { fmtDate, fmtUsd } from "@/lib/format";
+import { planLabel } from "@/lib/plans";
+import type { Sport } from "@/lib/sports";
 
 export default async function AdminDashboard({ params }: PageProps<"/[locale]/admin">) {
   const { locale, t } = await resolveLocale(params);
@@ -15,7 +17,7 @@ export default async function AdminDashboard({ params }: PageProps<"/[locale]/ad
     supabase.from("subscriptions").select("user_id, tier").eq("revoked", false).lte("starts_at", nowIso).gt("ends_at", nowIso),
     supabase.from("payments").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("payments").select("amount_usd").eq("status", "approved").gte("reviewed_at", ago30),
-    supabase.from("subscriptions").select("id, tier, ends_at, profiles!subscriptions_user_id_fkey(email)").eq("revoked", false).gt("ends_at", nowIso).lte("ends_at", in3days).order("ends_at"),
+    supabase.from("subscriptions").select("id, tier, sport, ends_at, profiles!subscriptions_user_id_fkey(email)").eq("revoked", false).gt("ends_at", nowIso).lte("ends_at", in3days).order("ends_at"),
     supabase.from("audit_log").select("id, action, entity, created_at").order("created_at", { ascending: false }).limit(10),
   ]);
 
@@ -23,7 +25,7 @@ export default async function AdminDashboard({ params }: PageProps<"/[locale]/ad
   const revenue = (paid ?? []).reduce((sum, p) => sum + Number(p.amount_usd), 0);
 
   const stats = [
-    { label: t.admin.activeRegular, value: usersByTier("regular"), color: "text-accent" },
+    { label: t.admin.activeSport, value: usersByTier("regular"), color: "text-accent" },
     { label: t.admin.activeVip, value: usersByTier("vip"), color: "text-vip" },
     { label: t.admin.pendingPayments, value: pending ?? 0, color: pending ? "text-warning" : "", href: `/${locale}/admin/payments` },
     { label: t.admin.revenue30, value: fmtUsd(revenue), color: "" },
@@ -33,9 +35,14 @@ export default async function AdminDashboard({ params }: PageProps<"/[locale]/ad
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-black">{t.admin.dashboard}</h1>
-        <Link href={`/${locale}/admin/slips/new`} className="btn btn-primary">
-          + {t.admin.newSlip}
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link href={`/${locale}/admin/predictions/new`} className="btn btn-primary">
+            + {t.admin.newPrediction}
+          </Link>
+          <Link href={`/${locale}/admin/slips/new`} className="btn btn-ghost border border-border">
+            + {t.admin.newSlip}
+          </Link>
+        </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((s) => {
@@ -68,7 +75,7 @@ export default async function AdminDashboard({ params }: PageProps<"/[locale]/ad
                 <li key={s.id} className="flex justify-between">
                   <span dir="ltr">{(s.profiles as unknown as { email: string } | null)?.email}</span>
                   <span className="text-muted">
-                    {s.tier.toUpperCase()} · {fmtDate(s.ends_at, locale)}
+                    {planLabel({ tier: s.tier, sport: s.sport as Sport | null }, t)} · {fmtDate(s.ends_at, locale)}
                   </span>
                 </li>
               ))}

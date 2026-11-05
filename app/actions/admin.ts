@@ -7,6 +7,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/auth";
 import { isLocale, type Locale } from "@/lib/config";
+import { PREDICTION_SPORTS } from "@/lib/sports";
 import type { FormState } from "./auth";
 
 // Defense in depth: the app checks admin here, and RLS/RPCs check again in the database.
@@ -29,7 +30,7 @@ const legSchema = z.object({
 });
 
 const slipSchema = z.object({
-  tier: z.enum(["regular", "vip"]),
+  price_usd: z.coerce.number().min(0).max(1000),
   title_en: z.string().trim().min(2).max(140),
   title_ar: z.string().trim().max(140).optional().transform((v) => v || null),
   confidence: z.coerce.number().int().min(0).max(100),
@@ -55,7 +56,7 @@ export async function saveSlip(_: FormState, formData: FormData): Promise<FormSt
   }
   if (!imageMode && (!Array.isArray(legs) || legs.length === 0)) return { error: "Add at least one selection" };
   const parsed = slipSchema.safeParse({
-    tier: formData.get("tier"),
+    price_usd: formData.get("price_usd"),
     title_en: text("title_en") || text("title_en_auto"),
     title_ar: text("title_ar") || text("title_ar_auto") || undefined,
     confidence: formData.get("confidence"),
@@ -139,6 +140,69 @@ export async function deleteSlip(formData: FormData) {
   if (data?.image_path) await supabase.storage.from("slip-images").remove([data.image_path]);
   await supabase.from("slips").delete().eq("id", id);
   revalidatePath(`/${locale}/admin/slips`);
+}
+
+const predictionSchema = z.object({
+  sport: z.enum(PREDICTION_SPORTS),
+  competition: z.string().trim().max(120).optional().transform((v) => v || null),
+  event: z.string().trim().min(2).max(160),
+  kickoff_at: z.string().datetime().nullable(),
+  market: z.string().trim().min(1).max(80),
+  pick: z.string().trim().min(1).max(80),
+  odds: z.coerce.number().min(1).max(1000),
+  confidence: z.coerce.number().int().min(0).max(100),
+  notes_en: z.string().trim().max(4000).optional().transform((v) => v || null),
+  notes_ar: z.string().trim().max(4000).optional().transform((v) => v || null),
+  publish_at: z.string().datetime(),
+});
+
+export async function savePrediction(_: FormState, formData: FormData): Promise<FormState> {
+  const { locale, session, supabase } = await adminContext(formData);
+  const id = formData.get("id") ? String(formData.get("id")) : null;
+  const optional = (key: string) => String(formData.get(key) ?? "").trim() || undefined;
+  const parsed = predictionSchema.safeParse({
+    sport: formData.get("sport"),
+    competition: optional("competition"),
+    event: formData.get("event"),
+    kickoff_at: optional("kickoff_at") ?? null,
+    market: formData.get("market"),
+    pick: formData.get("pick"),
+    odds: formData.get("odds"),
+    confidence: formData.get("confidence"),
+    notes_en: optional("notes_en"),
+    notes_ar: optional("notes_ar"),
+    publish_at: formData.get("publish_at"),
+  });
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    return { error: `${issue.path.join(".")}: ${issue.message}` };
+  }
+  const { error } = id
+    ? await supabase.from("predictions").update(parsed.data).eq("id", id)
+    : await supabase.from("predictions").insert({ ...parsed.data, created_by: session.userId });
+  if (error) return { error: error.message };
+
+  revalidatePath(`/${locale}/predictions`, "layout");
+  revalidatePath(`/${locale}/admin/predictions`);
+  // "Save and add another" keeps the sport, for entering a day's games in a row.
+  redirect(formData.get("next") === "new" ? `/${locale}/admin/predictions/new?sport=${parsed.data.sport}&saved=1` : `/${locale}/admin/predictions`);
+}
+
+export async function settlePrediction(formData: FormData) {
+  const { locale, supabase } = await adminContext(formData);
+  const id = z.string().uuid().parse(formData.get("id"));
+  const status = z.enum(["pending", "won", "lost", "void"]).parse(formData.get("status"));
+  await supabase.from("predictions").update({ status }).eq("id", id);
+  revalidatePath(`/${locale}/admin/predictions`);
+  revalidatePath(`/${locale}/predictions`, "layout");
+  revalidatePath(`/${locale}/results`);
+}
+
+export async function deletePrediction(formData: FormData) {
+  const { locale, supabase } = await adminContext(formData);
+  const id = z.string().uuid().parse(formData.get("id"));
+  await supabase.from("predictions").delete().eq("id", id);
+  revalidatePath(`/${locale}/admin/predictions`);
 }
 
 export async function approvePayment(formData: FormData) {

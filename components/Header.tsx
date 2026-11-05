@@ -7,13 +7,15 @@ import Logo from "./Logo";
 import LanguageSwitch from "./LanguageSwitch";
 import SideMenu from "./nav/SideMenu";
 import Icon from "./nav/Icon";
+import { sportEmoji } from "@/lib/sports";
 
 export default async function Header({ locale }: { locale: Locale }) {
   const t = getDictionary(locale);
   const session = await getSession();
   const isAdmin = session?.role === "admin";
   const pending = isAdmin ? await pendingPaymentsCount() : 0;
-  const tierLabel = session?.tier === "vip" ? `★ ${t.common.vip}` : session?.tier === "regular" ? t.common.regular : null;
+  const vip = !!session?.access.vip;
+  const tierLabel = vip ? `★ ${t.common.vip}` : session?.access.sports.length ? session.access.sports.map(sportEmoji).join(" ") : null;
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-bg/85 backdrop-blur">
@@ -32,7 +34,7 @@ export default async function Header({ locale }: { locale: Locale }) {
             noPlan: t.nav.noPlan,
             admin: t.nav.admin,
           }}
-          user={session ? { name: session.fullName ?? "", email: session.email, tierLabel, vip: session.tier === "vip", admin: isAdmin } : null}
+          user={session ? { name: session.fullName ?? "", email: session.email, tierLabel, vip, admin: isAdmin } : null}
           items={siteNav(locale, t, session, pending)}
         />
         <Link href={`/${locale}`} aria-label={t.nav.home}>
@@ -57,7 +59,7 @@ export default async function Header({ locale }: { locale: Locale }) {
           {tierLabel && (
             <span
               className={`hidden rounded-full px-2.5 py-1 text-xs font-bold sm:inline ${
-                session?.tier === "vip" ? "bg-vip text-[#1a1200]" : "bg-accent/15 text-accent"
+                vip ? "bg-vip text-[#1a1200]" : "bg-accent/15 text-accent"
               }`}
             >
               {tierLabel}
@@ -67,8 +69,8 @@ export default async function Header({ locale }: { locale: Locale }) {
             <LanguageSwitch locale={locale} label={t.nav.language} />
           </span>
           {session ? (
-            <Link href={`/${locale}/slips`} className="btn btn-primary hidden text-sm sm:inline-flex">
-              {t.nav.slips}
+            <Link href={`/${locale}/predictions`} className="btn btn-primary hidden text-sm sm:inline-flex">
+              {t.nav.predictions}
             </Link>
           ) : (
             <>

@@ -5,6 +5,8 @@ import { fmtDate, fmtUsd } from "@/lib/format";
 import type { Plan } from "@/lib/types";
 import { grantPlan, revokeSubscription, setUser } from "@/app/actions/admin";
 import ConfirmButton from "@/components/admin/ConfirmButton";
+import { planLabel } from "@/lib/plans";
+import type { Sport } from "@/lib/sports";
 
 type UserRow = {
   id: string;
@@ -14,7 +16,7 @@ type UserRow = {
   role: "user" | "admin";
   banned: boolean;
   created_at: string;
-  subscriptions: { id: string; tier: "regular" | "vip"; ends_at: string; revoked: boolean }[];
+  subscriptions: { id: string; tier: "regular" | "vip"; sport: Sport | null; ends_at: string; revoked: boolean }[];
 };
 
 export default async function AdminUsers({ params, searchParams }: PageProps<"/[locale]/admin/users">) {
@@ -26,7 +28,7 @@ export default async function AdminUsers({ params, searchParams }: PageProps<"/[
 
   let query = supabase
     .from("profiles")
-    .select("id, email, full_name, phone, role, banned, created_at, subscriptions!subscriptions_user_id_fkey(id, tier, ends_at, revoked)")
+    .select("id, email, full_name, phone, role, banned, created_at, subscriptions!subscriptions_user_id_fkey(id, tier, sport, ends_at, revoked)")
     .order("created_at", { ascending: false })
     .limit(50);
   if (search) {
@@ -34,7 +36,7 @@ export default async function AdminUsers({ params, searchParams }: PageProps<"/[
     const safe = search.replace(/[,()*%\\]/g, "");
     query = query.or(`email.ilike.%${safe}%,full_name.ilike.%${safe}%`);
   }
-  const [{ data }, { data: plans }] = await Promise.all([query, supabase.from("plans").select("*").order("tier").order("price_usd")]);
+  const [{ data }, { data: plans }] = await Promise.all([query, supabase.from("plans").select("*").eq("active", true).order("tier", { ascending: false }).order("sport").order("price_usd")]);
   const users = (data ?? []) as UserRow[];
   const now = new Date();
 
@@ -89,7 +91,7 @@ export default async function AdminUsers({ params, searchParams }: PageProps<"/[
                 <form key={s.id} action={revokeSubscription} className="flex items-center gap-1 rounded-lg bg-surface-2 py-1 ps-3 pe-1">
                   <input type="hidden" name="locale" value={locale} />
                   <input type="hidden" name="id" value={s.id} />
-                  <b className={s.tier === "vip" ? "text-vip" : "text-accent"}>{t.common[s.tier]}</b>
+                  <b className={s.tier === "vip" ? "text-vip" : "text-accent"}>{planLabel(s, t)}</b>
                   <span className="text-muted">→ {fmtDate(s.ends_at, locale, false)}</span>
                   <ConfirmButton message="Revoke this subscription?" className="rounded px-1.5 text-muted hover:text-danger">
                     ✕
@@ -102,7 +104,7 @@ export default async function AdminUsers({ params, searchParams }: PageProps<"/[
                 <select name="plan" className="input w-auto py-1 text-sm">
                   {((plans ?? []) as Plan[]).map((p) => (
                     <option key={p.id} value={p.id}>
-                      {t.common[p.tier]} · {t.common[p.duration]} ({fmtUsd(p.price_usd)})
+                      {planLabel(p, t)} ({fmtUsd(p.price_usd)})
                     </option>
                   ))}
                 </select>

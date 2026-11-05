@@ -2,6 +2,8 @@ import { resolveLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { fmtDate, fmtUsd } from "@/lib/format";
 import { approvePayment, rejectPayment } from "@/app/actions/admin";
+import { planLabel } from "@/lib/plans";
+import type { Sport } from "@/lib/sports";
 
 type Row = {
   id: string;
@@ -13,8 +15,13 @@ type Row = {
   status: "pending" | "approved" | "rejected";
   admin_note: string | null;
   user: { email: string; full_name: string | null; phone: string | null } | null;
-  plans: { tier: "regular" | "vip"; duration: "week" | "month" | "quarter" | "year" } | null;
+  plans: { tier: "regular" | "vip"; sport: Sport | null; duration: "week" | "month" | "quarter" | "year" } | null;
+  slips: { title_en: string; slip_legs: { kickoff_at: string | null }[] } | null;
 };
+
+// A slip payment approved after its first game started still opens the slip, so flag it before approving.
+const firstKickoff = (slip: Row["slips"]) =>
+  slip?.slip_legs.map((l) => l.kickoff_at).filter((k): k is string => !!k).sort()[0] ?? null;
 
 export default async function AdminPayments({ params, searchParams }: PageProps<"/[locale]/admin/payments">) {
   const { locale, t } = await resolveLocale(params);
@@ -24,7 +31,7 @@ export default async function AdminPayments({ params, searchParams }: PageProps<
 
   let query = supabase
     .from("payments")
-    .select("id, created_at, method, reference, proof_path, amount_usd, status, admin_note, user:profiles!payments_user_id_fkey(email, full_name, phone), plans!payments_plan_id_fkey(tier, duration)")
+    .select("id, created_at, method, reference, proof_path, amount_usd, status, admin_note, user:profiles!payments_user_id_fkey(email, full_name, phone), plans!payments_plan_id_fkey(tier, sport, duration), slips!payments_slip_id_fkey(title_en, slip_legs(kickoff_at))")
     .order("created_at", { ascending: filter === "pending" })
     .limit(100);
   if (filter) query = query.eq("status", filter);
@@ -60,9 +67,18 @@ export default async function AdminPayments({ params, searchParams }: PageProps<
             <p className="text-xs text-muted">{fmtDate(p.created_at, locale)}</p>
           </div>
           <div className="text-sm">
-            <p>
-              <b className={p.plans?.tier === "vip" ? "text-vip" : "text-accent"}>{p.plans ? t.common[p.plans.tier] : "?"}</b> · {p.plans ? t.common[p.plans.duration] : ""}
-            </p>
+            {p.slips ? (
+              <p>
+                🎟 <b>{t.admin.slipPurchase}</b>: {p.slips.title_en}
+                {p.status === "pending" && firstKickoff(p.slips) && new Date(firstKickoff(p.slips)!) <= new Date() && (
+                  <span className="mt-1 block rounded bg-danger/15 px-2 py-0.5 text-xs font-bold text-danger">⚠ {t.admin.lateSlip}</span>
+                )}
+              </p>
+            ) : (
+              <p>
+                <b className={p.plans?.tier === "vip" ? "text-vip" : "text-accent"}>{p.plans ? planLabel(p.plans, t) : "?"}</b>
+              </p>
+            )}
             <p>
               <b dir="ltr">{fmtUsd(p.amount_usd)}</b> · {methods[p.method] ?? p.method}
             </p>

@@ -7,7 +7,7 @@ export default async function AdminSettings({ params }: PageProps<"/[locale]/adm
   const { locale, t } = await resolveLocale(params);
   const supabase = await createClient();
   const [{ data: plans }, { data: setting }, { data: contact }] = await Promise.all([
-    supabase.from("plans").select("*").order("tier").order("price_usd"),
+    supabase.from("plans").select("*").or("tier.eq.vip,sport.not.is.null").order("tier", { ascending: false }).order("sport").order("price_usd"),
     supabase.from("settings").select("value").eq("key", "payment_methods").single(),
     supabase.from("settings").select("value").eq("key", "contact").maybeSingle(),
   ]);

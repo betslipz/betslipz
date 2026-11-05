@@ -21,7 +21,7 @@ const en: Record<LegalDoc, Doc> = {
       {
         h: "1. Who we are",
         body: [
-          "{site} publishes sports betting predictions (\"slips\") and analysis. We are not a bookmaker or a gambling operator: we don't accept bets, hold money for betting, place bets for anyone or pay out winnings. We are not linked to, endorsed by or paid by any bookmaker or betting platform.",
+          "{site} publishes sports betting predictions for single games (\"predictions\"), ready-made combinations of picks (\"slips\") and analysis. We are not a bookmaker or a gambling operator: we don't accept bets, hold money for betting, place bets for anyone or pay out winnings. We are not linked to, endorsed by or paid by any bookmaker or betting platform.",
         ],
       },
       {
@@ -38,13 +38,13 @@ const en: Record<LegalDoc, Doc> = {
         h: "3. Our predictions are not guarantees",
         body: [
           [
-            "Slips are our opinions, based on our own research. They are predictions, not promises of any result.",
-            "The confidence percentage on a slip is our own estimate of how strong we think it is. It isn't the probability of winning and it isn't a guarantee.",
+            "Predictions and slips are our opinions, based on our own research. They are predictions, not promises of any result.",
+            "The confidence percentage on a prediction or slip is our own estimate of how strong we think it is. It isn't the probability of winning and it isn't a guarantee.",
             "Suggested stakes are shown in \"units\" to show how strongly we rate a slip compared with others. They are not financial advice. You alone decide whether to bet and how much.",
-            "Results, win rates and statistics on the Site describe slips that are already settled. Past results don't predict future results.",
-            "Odds shown on a slip are the odds we saw when we published it. The odds your bookmaker offers you may be different.",
+            "Results, win rates and statistics on the Site describe predictions and slips that are already settled. Past results don't predict future results.",
+            "Odds shown on a prediction or slip are the odds we saw when we published it. The odds your bookmaker offers you may be different.",
             "Every bet you place is your own decision, made with your own bookmaker, at your own risk. We are not responsible for any money you lose.",
-            "After its events finish, we mark each slip as won, lost, partly won or void.",
+            "After its games finish, we mark each prediction as won, lost or void, and each slip as won, lost, partly won or void.",
           ],
         ],
       },
@@ -61,17 +61,19 @@ const en: Record<LegalDoc, Doc> = {
         ],
       },
       {
-        h: "5. Plans and payment",
+        h: "5. Plans, slips and payment",
         body: [
           [
-            "A Regular plan gives access to Regular slips. A VIP plan gives access to Regular and VIP slips. You choose a period of 1 week, 1 month, 3 months or 1 year. Prices are shown in US dollars on the Site.",
-            "You pay with one of the methods shown on the Subscribe page, then submit your transfer reference. Your plan starts when we confirm that we have received your payment, not when you send it.",
-            "If we can't confirm a payment, for example because the reference is wrong or the money hasn't arrived, we reject the request and no plan starts.",
-            "If you buy a plan while you already have an active plan of the same tier, the new period starts when your current one ends.",
-            "Plans don't renew automatically and we never charge you automatically. When a plan ends, your access to paid slips stops.",
+            "A sport plan gives access to the predictions for one sport: football, basketball, tennis or darts. A VIP plan gives access to the predictions for every sport and to every slip. You choose a period of 1 week, 1 month, 3 months or 1 year. Prices are shown in US dollars on the Site.",
+            "A sport plan doesn't include slips. Without VIP, you can buy a single slip at the price shown on it. Buying a slip gives you access to that slip only.",
+            "You pay with one of the methods shown on the Site, then submit your transfer reference. Your plan or slip opens when we confirm that we have received your payment, not when you send it.",
+            "A slip can only be bought until its first game starts. We check payments by hand, so a slip you bought may open for you after some of its games have already started. This doesn't entitle you to a refund.",
+            "If we can't confirm a payment, for example because the reference is wrong or the money hasn't arrived, we reject the request and nothing opens.",
+            "If you buy a plan while you already have an active plan of the same kind (the same sport, or VIP), the new period starts when your current one ends.",
+            "Plans don't renew automatically and we never charge you automatically. When a plan ends, your access to what it includes stops. Slips you bought stay open.",
             "You must send the exact amount shown. Any fees charged by your payment provider or the crypto network are yours to pay.",
-            "We may change prices at any time. A price change doesn't affect a plan you have already paid for.",
-            "New accounts may be offered a one-time free view of one Regular slip (the \"welcome gift\"). It has no cash value, and we may change or end it at any time.",
+            "We may change prices at any time. A price change doesn't affect a plan or slip you have already paid for.",
+            "New accounts may be offered one slip for free, once (the \"welcome gift\"). It has no cash value, and we may change or end it at any time.",
           ],
         ],
       },
@@ -80,11 +82,11 @@ const en: Record<LegalDoc, Doc> = {
         body: ["All payments are final. We don't give refunds, in full or in part, for any reason. Our Refund Policy explains this in detail."],
       },
       {
-        h: "7. Slips are for your personal use only",
+        h: "7. Our content is for your personal use only",
         body: [
           [
-            "Everything you see as a member, including slips, picks, analysis and slip images, is for your own personal use.",
-            "You may not copy, share, forward, publish, resell or post our slips or slip images, in full or in part, anywhere, including WhatsApp, Telegram and social media, whether for free or for money.",
+            "Everything you see as a member, including predictions, slips, picks, analysis and slip images, is for your own personal use.",
+            "You may not copy, share, forward, publish, resell or post our predictions, slips or slip images, in full or in part, anywhere, including WhatsApp, Telegram and social media, whether for free or for money.",
             "Slip images shown to you carry your account's email address. If our content is shared, we may use it to identify the account it came from.",
             "If you share our content, we may close your account immediately, without a refund.",
           ],
@@ -177,8 +179,8 @@ const en: Record<LegalDoc, Doc> = {
         body: [
           [
             "Account details: your email address, name and preferred language, and your phone (WhatsApp) number if you add it on your account page. Your password is stored only in a scrambled (hashed) form that no one, including us, can read.",
-            "Payment details: the plan you chose, the payment method, your transfer reference or transaction ID, the amount, the receipt you upload (if any), and whether we approved or rejected the payment. We never ask for or store card numbers, bank account numbers, or your login details for Whish, OMT or a crypto wallet.",
-            "Plan details: your plans and their start and end dates, whether you have used the welcome gift, and an identifier for your current login, which we use for the one-device rule.",
+            "Payment details: the plan or slip you chose, the payment method, your transfer reference or transaction ID, the amount, the receipt you upload (if any), and whether we approved or rejected the payment. We never ask for or store card numbers, bank account numbers, or your login details for Whish, OMT or a crypto wallet.",
+            "Plan details: your plans and their start and end dates, the slips you bought, whether you have used the welcome gift, and an identifier for your current login, which we use for the one-device rule.",
             "Technical data: when you log in, our login provider records details such as your IP address, browser, device type and the time. Our hosting provider records similar details, such as your IP address, when you visit the Site.",
             "Messages: if you contact us by email or WhatsApp, we keep the conversation.",
           ],
@@ -189,8 +191,8 @@ const en: Record<LegalDoc, Doc> = {
         body: [
           [
             "To create and run your account and log you in.",
-            "To check your payments and activate your plans.",
-            "To show you the slips your plan includes.",
+            "To check your payments and open the plans and slips you paid for.",
+            "To show you the predictions and slips your plan or purchases include.",
             "To enforce one person and one device per account, and to protect the Site from abuse and fraud.",
             "To show your email address on the slip images you view, so that shared content can be traced back to the account it came from.",
             "To reply to you and contact you about your account, plan or payments.",
@@ -281,16 +283,17 @@ const en: Record<LegalDoc, Doc> = {
         body: [
           "This includes, for example, when:",
           [
-            "slips lose, or win less than you hoped;",
-            "you don't use your plan, or use only part of it;",
+            "predictions or slips lose, or win less than you hoped;",
+            "you don't use your plan or slip, or use only part of it;",
             "you change your mind after paying;",
-            "you bought the wrong plan or tier;",
+            "you bought the wrong plan, sport or slip;",
+            "a slip you bought opened after some of its games had started, because your payment was confirmed later;",
             "you can't use the Site because of your device, your internet connection or where you live;",
             "you were logged out because your account was logged in on another device;",
             "your account is suspended or closed for breaking our Terms, for example for sharing slips;",
             "you ask us to close your account before your plan ends;",
             "we change our prices after you pay;",
-            "the Site is temporarily unavailable, or fewer slips are published on some days.",
+            "the Site is temporarily unavailable, or fewer predictions or slips are published on some days.",
           ],
         ],
       },
@@ -301,7 +304,7 @@ const en: Record<LegalDoc, Doc> = {
       {
         h: "4. Payments we can't confirm",
         body: [
-          "A plan starts only after we confirm that we have received your payment. If we can't confirm it, for example because the transfer reference is wrong or the money hasn't arrived, we reject the request and no plan starts. If you believe your payment did arrive, contact us with your receipt and we will check again.",
+          "A plan or slip opens only after we confirm that we have received your payment. If we can't confirm it, for example because the transfer reference is wrong or the money hasn't arrived, we reject the request and nothing opens. If you believe your payment did arrive, contact us with your receipt and we will check again.",
         ],
       },
       {
@@ -326,7 +329,7 @@ const ar: Record<LegalDoc, Doc> = {
       {
         h: "1. من نحن",
         body: [
-          "ينشر {site} توقعات للمراهنات الرياضية (\"القسائم\") وتحليلات لها. نحن لسنا شركة مراهنات ولا مشغّلاً للمقامرة: لا نقبل الرهانات، ولا نحتفظ بأموال للمراهنة، ولا نراهن نيابةً عن أحد، ولا ندفع أي أرباح. ولا نرتبط بأي شركة أو منصة مراهنات، ولا نحظى بتأييدها، ولا نتلقى منها أي مقابل.",
+          "ينشر {site} توقعات للمراهنات الرياضية لمباريات منفردة (\"التوقعات\")، ومجموعات جاهزة من التوقعات (\"القسائم\")، وتحليلات لها. نحن لسنا شركة مراهنات ولا مشغّلاً للمقامرة: لا نقبل الرهانات، ولا نحتفظ بأموال للمراهنة، ولا نراهن نيابةً عن أحد، ولا ندفع أي أرباح. ولا نرتبط بأي شركة أو منصة مراهنات، ولا نحظى بتأييدها، ولا نتلقى منها أي مقابل.",
         ],
       },
       {
@@ -343,13 +346,13 @@ const ar: Record<LegalDoc, Doc> = {
         h: "3. توقعاتنا ليست ضمانات",
         body: [
           [
-            "القسائم هي آراؤنا المبنية على أبحاثنا الخاصة. إنها توقعات، وليست وعوداً بأي نتيجة.",
-            "نسبة الثقة على كل قسيمة هي تقديرنا الخاص لمدى قوتها. وهي ليست احتمال الفوز، وليست ضماناً.",
+            "التوقعات والقسائم هي آراؤنا المبنية على أبحاثنا الخاصة. إنها توقعات، وليست وعوداً بأي نتيجة.",
+            "نسبة الثقة على كل توقّع أو قسيمة هي تقديرنا الخاص لمدى قوته. وهي ليست احتمال الفوز، وليست ضماناً.",
             "يُعرض الرهان المقترح بـ\"الوحدات\" لبيان مدى قوة تقييمنا للقسيمة مقارنةً بغيرها. وهو ليس نصيحة مالية. أنت وحدك من يقرّر ما إذا كان سيراهن وبأي مبلغ.",
-            "النتائج ونسب الفوز والإحصاءات على الموقع تخصّ قسائم محسومة. النتائج السابقة لا تتنبأ بالنتائج المستقبلية.",
-            "الأودز المعروضة على القسيمة هي الأودز التي رأيناها عند نشرها. وقد تختلف الأودز التي تقدّمها لك شركة المراهنات.",
+            "النتائج ونسب الفوز والإحصاءات على الموقع تخصّ توقعات وقسائم محسومة. النتائج السابقة لا تتنبأ بالنتائج المستقبلية.",
+            "الأودز المعروضة على التوقّع أو القسيمة هي الأودز التي رأيناها عند نشره. وقد تختلف الأودز التي تقدّمها لك شركة المراهنات.",
             "كل رهان تضعه هو قرارك الشخصي، لدى شركة المراهنات التي تختارها، وعلى مسؤوليتك. لسنا مسؤولين عن أي أموال تخسرها.",
-            "بعد انتهاء مباريات القسيمة، نصنّفها رابحة أو خاسرة أو رابحة جزئياً أو ملغاة.",
+            "بعد انتهاء المباريات، نصنّف كل توقّع رابحاً أو خاسراً أو ملغى، وكل قسيمة رابحة أو خاسرة أو رابحة جزئياً أو ملغاة.",
           ],
         ],
       },
@@ -366,17 +369,19 @@ const ar: Record<LegalDoc, Doc> = {
         ],
       },
       {
-        h: "5. الباقات والدفع",
+        h: "5. الباقات والقسائم والدفع",
         body: [
           [
-            "الباقة العادية تتيح الوصول إلى القسائم العادية. وباقة VIP تتيح الوصول إلى القسائم العادية وقسائم VIP. تختار مدة أسبوع أو شهر أو 3 أشهر أو سنة. تُعرض الأسعار على الموقع بالدولار الأميركي.",
-            "تدفع بإحدى الطرق المعروضة في صفحة الاشتراك، ثم ترسل رقم مرجع التحويل. تبدأ باقتك عندما نؤكّد أننا استلمنا دفعتك، وليس عند إرسالك لها.",
-            "إذا لم نتمكن من تأكيد دفعة ما، مثلاً لأن رقم المرجع خاطئ أو لأن المبلغ لم يصل، نرفض الطلب ولا تبدأ أي باقة.",
-            "إذا اشتريت باقة وكانت لديك باقة فعّالة من الفئة نفسها، تبدأ المدة الجديدة عند انتهاء باقتك الحالية.",
-            "لا تتجدد الباقات تلقائياً، ولا نقتطع منك أي مبلغ تلقائياً أبداً. عند انتهاء الباقة، يتوقف وصولك إلى القسائم المدفوعة.",
+            "باقة الرياضة تتيح الوصول إلى توقعات رياضة واحدة: كرة القدم أو كرة السلة أو التنس أو السهام. وباقة VIP تتيح الوصول إلى توقعات كل الرياضات وإلى كل القسائم. تختار مدة أسبوع أو شهر أو 3 أشهر أو سنة. تُعرض الأسعار على الموقع بالدولار الأميركي.",
+            "لا تشمل باقة الرياضة القسائم. ومن دون VIP، يمكنك شراء قسيمة واحدة بالسعر المعروض عليها. وشراء القسيمة يمنحك الوصول إلى تلك القسيمة فقط.",
+            "تدفع بإحدى الطرق المعروضة على الموقع، ثم ترسل رقم مرجع التحويل. تُفتح باقتك أو قسيمتك عندما نؤكّد أننا استلمنا دفعتك، وليس عند إرسالك لها.",
+            "لا يمكن شراء القسيمة إلا قبل بدء مباراتها الأولى. نراجع الدفعات يدوياً، لذا قد تُفتح لك قسيمة اشتريتها بعد أن تكون بعض مبارياتها قد بدأت. ولا يمنحك ذلك الحق في استرداد أي مبلغ.",
+            "إذا لم نتمكن من تأكيد دفعة ما، مثلاً لأن رقم المرجع خاطئ أو لأن المبلغ لم يصل، نرفض الطلب ولا يُفتح أي شيء.",
+            "إذا اشتريت باقة وكانت لديك باقة فعّالة من النوع نفسه (الرياضة نفسها، أو VIP)، تبدأ المدة الجديدة عند انتهاء باقتك الحالية.",
+            "لا تتجدد الباقات تلقائياً، ولا نقتطع منك أي مبلغ تلقائياً أبداً. عند انتهاء الباقة، يتوقف وصولك إلى ما تشمله. وتبقى القسائم التي اشتريتها مفتوحة.",
             "يجب أن ترسل المبلغ المعروض بالضبط. وأي رسوم تفرضها جهة الدفع أو شبكة العملات الرقمية تقع على عاتقك.",
-            "يحق لنا تغيير الأسعار في أي وقت. ولا يؤثر تغيير السعر على باقة سبق أن دفعت ثمنها.",
-            "قد تُمنح الحسابات الجديدة مشاهدة مجانية لمرة واحدة لقسيمة عادية واحدة (\"الهدية الترحيبية\"). ليست لها أي قيمة نقدية، ويحق لنا تغييرها أو إيقافها في أي وقت.",
+            "يحق لنا تغيير الأسعار في أي وقت. ولا يؤثر تغيير السعر على باقة أو قسيمة سبق أن دفعت ثمنها.",
+            "قد تُمنح الحسابات الجديدة قسيمة واحدة مجاناً، لمرة واحدة (\"الهدية الترحيبية\"). ليست لها أي قيمة نقدية، ويحق لنا تغييرها أو إيقافها في أي وقت.",
           ],
         ],
       },
@@ -385,11 +390,11 @@ const ar: Record<LegalDoc, Doc> = {
         body: ["جميع المدفوعات نهائية. لا نردّ أي مبلغ، كلياً أو جزئياً، لأي سبب كان. وتشرح سياسة الاسترداد ذلك بالتفصيل."],
       },
       {
-        h: "7. القسائم لاستخدامك الشخصي فقط",
+        h: "7. محتوانا لاستخدامك الشخصي فقط",
         body: [
           [
-            "كل ما تراه بصفتك مشتركاً، بما في ذلك القسائم والتوقعات والتحليلات وصور القسائم، هو لاستخدامك الشخصي فقط.",
-            "لا يحق لك نسخ قسائمنا أو صورها أو مشاركتها أو إعادة إرسالها أو نشرها أو إعادة بيعها، كلياً أو جزئياً، في أي مكان، بما في ذلك واتساب وتيليغرام ووسائل التواصل الاجتماعي، سواء مجاناً أو مقابل مال.",
+            "كل ما تراه بصفتك مشتركاً، بما في ذلك التوقعات والقسائم والتحليلات وصور القسائم، هو لاستخدامك الشخصي فقط.",
+            "لا يحق لك نسخ توقعاتنا أو قسائمنا أو صورها أو مشاركتها أو إعادة إرسالها أو نشرها أو إعادة بيعها، كلياً أو جزئياً، في أي مكان، بما في ذلك واتساب وتيليغرام ووسائل التواصل الاجتماعي، سواء مجاناً أو مقابل مال.",
             "تحمل صور القسائم المعروضة لك عنوان البريد الإلكتروني لحسابك. وإذا تمت مشاركة محتوانا، يحق لنا استخدامه لمعرفة الحساب الذي صدر منه.",
             "إذا شاركت محتوانا، يحق لنا إغلاق حسابك فوراً ومن دون استرداد أي مبلغ.",
           ],
@@ -482,8 +487,8 @@ const ar: Record<LegalDoc, Doc> = {
         body: [
           [
             "بيانات الحساب: بريدك الإلكتروني واسمك ولغتك المفضّلة، ورقم هاتفك (واتساب) إذا أضفته في صفحة حسابك. تُحفظ كلمة المرور فقط بصيغة مشفّرة (مُجزّأة) لا يستطيع أحد قراءتها، ولا حتى نحن.",
-            "بيانات الدفع: الباقة التي اخترتها، وطريقة الدفع، ورقم مرجع التحويل أو معرّف المعاملة، والمبلغ، والإيصال الذي ترفعه (إن وُجد)، وما إذا كنا قد قبلنا الدفعة أو رفضناها. لا نطلب أبداً أرقام البطاقات أو الحسابات المصرفية، ولا بيانات دخولك إلى Whish أو OMT أو محفظة العملات الرقمية، ولا نحفظها.",
-            "بيانات الباقة: باقاتك وتواريخ بدئها وانتهائها، وما إذا كنت قد استخدمت الهدية الترحيبية، ومعرّف لجلسة دخولك الحالية نستخدمه لتطبيق قاعدة الجهاز الواحد.",
+            "بيانات الدفع: الباقة أو القسيمة التي اخترتها، وطريقة الدفع، ورقم مرجع التحويل أو معرّف المعاملة، والمبلغ، والإيصال الذي ترفعه (إن وُجد)، وما إذا كنا قد قبلنا الدفعة أو رفضناها. لا نطلب أبداً أرقام البطاقات أو الحسابات المصرفية، ولا بيانات دخولك إلى Whish أو OMT أو محفظة العملات الرقمية، ولا نحفظها.",
+            "بيانات الباقة: باقاتك وتواريخ بدئها وانتهائها، والقسائم التي اشتريتها، وما إذا كنت قد استخدمت الهدية الترحيبية، ومعرّف لجلسة دخولك الحالية نستخدمه لتطبيق قاعدة الجهاز الواحد.",
             "البيانات التقنية: عند تسجيل الدخول، تسجّل الجهة التي تدير تسجيل الدخول لدينا تفاصيل مثل عنوان IP والمتصفح ونوع الجهاز والوقت. وتسجّل جهة استضافة الموقع تفاصيل مشابهة، مثل عنوان IP، عند زيارتك للموقع.",
             "الرسائل: إذا تواصلت معنا عبر البريد الإلكتروني أو واتساب، نحتفظ بالمحادثة.",
           ],
@@ -494,8 +499,8 @@ const ar: Record<LegalDoc, Doc> = {
         body: [
           [
             "لإنشاء حسابك وإدارته وتسجيل دخولك.",
-            "للتحقق من دفعاتك وتفعيل باقاتك.",
-            "لعرض القسائم التي تشملها باقتك.",
+            "للتحقق من دفعاتك وفتح الباقات والقسائم التي دفعت ثمنها.",
+            "لعرض التوقعات والقسائم التي تشملها باقتك أو مشترياتك.",
             "لتطبيق قاعدة الشخص الواحد والجهاز الواحد لكل حساب، ولحماية الموقع من سوء الاستخدام والاحتيال.",
             "لإظهار بريدك الإلكتروني على صور القسائم التي تشاهدها، بحيث يمكن معرفة الحساب الذي صدر منه أي محتوى تتم مشاركته.",
             "للرد عليك والتواصل معك بشأن حسابك أو باقتك أو دفعاتك.",
@@ -587,16 +592,17 @@ const ar: Record<LegalDoc, Doc> = {
         body: [
           "ويشمل ذلك مثلاً الحالات التالية:",
           [
-            "خسارة القسائم، أو ربحها أقل مما كنت تأمل؛",
-            "عدم استخدامك لباقتك، أو استخدامك لجزء منها فقط؛",
+            "خسارة التوقعات أو القسائم، أو ربحها أقل مما كنت تأمل؛",
+            "عدم استخدامك لباقتك أو قسيمتك، أو استخدامك لجزء منها فقط؛",
             "تغيير رأيك بعد الدفع؛",
-            "شراؤك الباقة أو الفئة الخطأ؛",
+            "شراؤك الباقة أو الرياضة أو القسيمة الخطأ؛",
+            "فتح قسيمة اشتريتها بعد أن بدأت بعض مبارياتها، لأن دفعتك أُكّدت لاحقاً؛",
             "عدم قدرتك على استخدام الموقع بسبب جهازك أو اتصالك بالإنترنت أو مكان إقامتك؛",
             "تسجيل خروجك لأن حسابك سُجّل دخوله على جهاز آخر؛",
             "تعليق حسابك أو إغلاقه بسبب مخالفة الشروط، مثلاً بسبب مشاركة القسائم؛",
             "طلبك إغلاق حسابك قبل انتهاء باقتك؛",
             "تغيير أسعارنا بعد أن تدفع؛",
-            "عدم توفّر الموقع مؤقتاً، أو نشر عدد أقل من القسائم في بعض الأيام.",
+            "عدم توفّر الموقع مؤقتاً، أو نشر عدد أقل من التوقعات أو القسائم في بعض الأيام.",
           ],
         ],
       },
@@ -607,7 +613,7 @@ const ar: Record<LegalDoc, Doc> = {
       {
         h: "4. الدفعات التي لا يمكننا تأكيدها",
         body: [
-          "لا تبدأ الباقة إلا بعد أن نؤكّد أننا استلمنا دفعتك. إذا لم نتمكن من تأكيدها، مثلاً لأن رقم مرجع التحويل خاطئ أو لأن المبلغ لم يصل، نرفض الطلب ولا تبدأ أي باقة. وإذا كنت تعتقد أن دفعتك وصلت فعلاً، تواصل معنا مع الإيصال وسنتحقق مجدداً.",
+          "لا تُفتح الباقة أو القسيمة إلا بعد أن نؤكّد أننا استلمنا دفعتك. إذا لم نتمكن من تأكيدها، مثلاً لأن رقم مرجع التحويل خاطئ أو لأن المبلغ لم يصل، نرفض الطلب ولا يُفتح أي شيء. وإذا كنت تعتقد أن دفعتك وصلت فعلاً، تواصل معنا مع الإيصال وسنتحقق مجدداً.",
         ],
       },
       {

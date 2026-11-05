@@ -1,15 +1,14 @@
 import Link from "next/link";
 import type { Locale } from "@/lib/config";
 import type { Dictionary } from "@/lib/i18n/en";
-import type { Session } from "@/lib/auth";
+import { seesAllSlips, type Session } from "@/lib/auth";
 import type { GiftState } from "@/lib/gift";
-import type { Teaser } from "./LockedSlip";
-import { fmtOdds } from "@/lib/format";
-import { TierBadge } from "./StatusBadge";
+import { teaserState, type Teaser } from "./LockedSlip";
+import { fmtOdds, fmtUsd } from "@/lib/format";
 import ConfidenceMeter from "./ConfidenceMeter";
 import SlipPaper from "./SlipPaper";
 
-// Stand-in picks drawn under the blur: the real ones never reach visitors who haven't unlocked them.
+// Stand-in picks drawn under the blur: the real ones never reach visitors who haven't opened the slip.
 const PLACEHOLDER_LEGS = [
   { event: "Team A vs Team B", market: "Double chance", pick: "1X", odds: 1.5 },
   { event: "Team C vs Team D", market: "1X2", pick: "Team C", odds: 1.24 },
@@ -17,7 +16,7 @@ const PLACEHOLDER_LEGS = [
   { event: "Team G vs Team H", market: "Double chance", pick: "X2", odds: 1.32 },
 ].map((l) => ({ ...l, kickoff_at: null, result: "pending" as const }));
 
-// Home page hero: today's slip as a blurred ticket, with a Reveal button that leads to payment.
+// Home page hero: the newest open slip as a blurred ticket, with a button to buy it (or open it free with the welcome gift).
 export default function RevealSlip({
   featured,
   session,
@@ -32,23 +31,18 @@ export default function RevealSlip({
   t: Dictionary;
 }) {
   const teaser = featured?.teaser;
-  const vip = teaser?.tier === "vip";
-  const entitled =
-    !!session &&
-    !!teaser &&
-    (session.role === "admin" || session.tier === "vip" || (!vip && (session.tier === "regular" || gift === "active")));
-  // Regular slips can be revealed free once with the welcome gift: guests sign up, new accounts claim it on Today's slips.
-  const free = !!teaser && !vip && !entitled && (!session || gift === "available");
-  const href = entitled ? `/${locale}/slips` : free ? `/${locale}/${session ? "slips" : "signup"}` : `/${locale}/subscribe${vip ? "?tier=vip" : ""}`;
+  const entitled = seesAllSlips(session);
+  const buyable = !!teaser && teaserState(teaser, false) === "buy";
+  // Guests sign up for the welcome gift; new accounts claim it on the Slips page.
+  const free = buyable && !entitled && (!session || gift === "available");
+  const href = entitled || !buyable ? `/${locale}/slips` : free ? `/${locale}/${session ? "slips" : "signup"}` : `/${locale}/subscribe?slip=${teaser.id}`;
+  const label = entitled || !buyable ? t.landing.viewSlip : free ? `🎁 ${t.landing.revealFree}` : t.slips.buy.replace("{price}", fmtUsd(teaser.price_usd));
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl border-2 shadow-2xl shadow-accent/10 ${vip ? "border-vip" : "border-slip-navy"}`}>
+    <div className="relative overflow-hidden rounded-2xl border-2 border-slip-navy shadow-2xl shadow-accent/10">
       <div className="pointer-events-none blur-[5px] select-none" aria-hidden>
         <div className="flex items-center justify-between gap-4 border-b-2 border-slip-gold bg-slip-navy p-4 text-white">
-          <div className="space-y-2">
-            <TierBadge tier={teaser?.tier ?? "vip"} t={t.common} />
-            <p className="text-lg font-bold">{t.landing.todaySlip}</p>
-          </div>
+          <p className="text-lg font-bold">{t.landing.todaySlip}</p>
           <ConfidenceMeter value={82} label={t.common.confidence} size={56} />
         </div>
         <SlipPaper
@@ -68,28 +62,25 @@ export default function RevealSlip({
           {teaser ? t.landing.todaySlip : t.landing.sampleSlip}
         </span>
         {teaser && (
-          <div className="flex items-center gap-2 text-sm">
-            <TierBadge tier={teaser.tier} t={t.common} />
-            <span className="text-muted">
-              {teaser.legs > 0 && (
-                <>
-                  {teaser.legs} {teaser.legs === 1 ? t.common.leg : t.common.legs} ·{" "}
-                </>
-              )}
-              {t.common.totalOdds}{" "}
-              <b className="text-text" dir="ltr">
-                {fmtOdds(teaser.total_odds)}
-              </b>
-            </span>
-          </div>
+          <p className="text-sm text-muted">
+            {teaser.legs > 0 && (
+              <>
+                {teaser.legs} {teaser.legs === 1 ? t.common.leg : t.common.legs} ·{" "}
+              </>
+            )}
+            {t.common.totalOdds}{" "}
+            <b className="text-text" dir="ltr">
+              {fmtOdds(teaser.total_odds)}
+            </b>
+          </p>
         )}
         <span className="text-4xl" aria-hidden>
           {entitled ? "🔓" : "🔒"}
         </span>
-        <Link href={href} className={`btn ${vip || free ? "btn-vip" : "btn-primary"} px-8 py-3 text-lg font-black shadow-lg`}>
-          {entitled ? t.landing.viewSlip : free ? `🎁 ${t.landing.revealFree}` : t.landing.reveal}
+        <Link href={href} className={`btn ${free ? "btn-vip" : "btn-primary"} px-8 py-3 text-lg font-black shadow-lg`}>
+          {label}
         </Link>
-        {!entitled && <p className="max-w-xs text-sm text-muted">{free ? t.landing.revealFreeHint : t.landing.revealHint}</p>}
+        {!entitled && buyable && <p className="max-w-xs text-sm text-muted">{free ? t.landing.revealFreeHint : t.landing.revealHint}</p>}
       </div>
     </div>
   );

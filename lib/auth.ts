@@ -4,8 +4,10 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Locale } from "@/lib/config";
+import { isSport, type Sport } from "@/lib/sports";
 
-export type Tier = "regular" | "vip";
+// What this login can open: VIP opens every sport and every slip; each sport plan opens one sport.
+export type Access = { vip: boolean; sports: Sport[] };
 
 export type Session = {
   userId: string;
@@ -13,9 +15,8 @@ export type Session = {
   fullName: string | null;
   role: "user" | "admin";
   banned: boolean;
-  tier: Tier | null;
-  giftDay: string | null; // day the welcome gift was claimed (see lib/gift.ts)
-  giftSlip: string | null; // the one slip it unlocked
+  access: Access;
+  giftClaimed: boolean; // the one free slip (see lib/gift.ts)
 };
 
 // One lookup per request: who is this, and what can they see?
@@ -26,9 +27,9 @@ export const getSession = cache(async (): Promise<Session | null> => {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const [{ data: profile }, { data: tier }, { data: current }] = await Promise.all([
+  const [{ data: profile }, { data: access }, { data: current }] = await Promise.all([
     supabase.from("profiles").select("full_name, role, banned").eq("id", user.id).single(),
-    supabase.rpc("current_tier"),
+    supabase.rpc("my_access"),
     supabase.rpc("session_is_current"),
   ]);
   // One login at a time: this account has since logged in on another device, so this one is logged out.
@@ -43,11 +44,18 @@ export const getSession = cache(async (): Promise<Session | null> => {
     fullName: profile?.full_name ?? null,
     role: profile?.role === "admin" ? "admin" : "user",
     banned: profile?.banned ?? false,
-    tier: (tier as Tier | null) ?? null,
-    giftDay: typeof user.app_metadata?.welcome_gift_day === "string" ? user.app_metadata.welcome_gift_day : null,
-    giftSlip: typeof user.app_metadata?.welcome_gift_slip === "string" ? user.app_metadata.welcome_gift_slip : null,
+    access: {
+      vip: access?.vip === true,
+      sports: Array.isArray(access?.sports) ? access.sports.filter(isSport) : [],
+    },
+    giftClaimed: typeof user.app_metadata?.welcome_gift_day === "string",
   };
 });
+
+// Admins see everything; members see the sports their plans cover.
+export const canSeeSport = (session: Session | null, sport: Sport) =>
+  !!session && (session.role === "admin" || session.access.vip || session.access.sports.includes(sport));
+export const seesAllSlips = (session: Session | null) => !!session && (session.role === "admin" || session.access.vip);
 
 export async function requireUser(locale: Locale) {
   const session = await getSession();

@@ -12,6 +12,7 @@ export type NavItem = { href: string; label: string; icon: IconName; badge?: num
 export function siteNav(locale: Locale, t: Dictionary, session: Session | null, pending = 0): NavItem[] {
   const items: NavItem[] = [
     { href: `/${locale}`, label: t.nav.home, icon: "home", exact: true },
+    { href: `/${locale}/predictions`, label: t.nav.predictions, icon: "target" },
     { href: `/${locale}/slips`, label: t.nav.slips, icon: "ticket" },
     { href: `/${locale}/live`, label: t.nav.live, icon: "live" },
     { href: `/${locale}/results`, label: t.nav.results, icon: "trophy" },
@@ -26,8 +27,10 @@ export function siteNav(locale: Locale, t: Dictionary, session: Session | null, 
 export function adminNav(locale: Locale, t: Dictionary, pending: number): NavItem[] {
   const base = `/${locale}/admin`;
   return [
-    { href: `${base}/slips/new`, label: t.admin.newSlip, icon: "plus", primary: true },
+    { href: `${base}/predictions/new`, label: t.admin.newPrediction, icon: "plus", primary: true },
+    { href: `${base}/slips/new`, label: t.admin.newSlip, icon: "plus" },
     { href: base, label: t.admin.dashboard, icon: "grid", exact: true },
+    { href: `${base}/predictions`, label: t.admin.predictions, icon: "target", exact: true },
     { href: `${base}/slips`, label: t.admin.slips, icon: "list", exact: true },
     { href: `${base}/payments`, label: t.admin.payments, icon: "wallet", badge: pending },
     { href: `${base}/users`, label: t.admin.users, icon: "users" },

@@ -3,7 +3,6 @@ import { SITE_NAME, type Locale } from "@/lib/config";
 import type { Dictionary } from "@/lib/i18n/en";
 import type { Slip } from "@/lib/types";
 import ConfidenceMeter from "./ConfidenceMeter";
-import { TierBadge } from "./StatusBadge";
 import SlipPaper from "./SlipPaper";
 import ProtectedImage from "./ProtectedImage";
 
@@ -30,12 +29,9 @@ export default async function SlipCard({
   const watermark = viewer ? `${viewer.email} · ${new Date().toISOString().slice(0, 10)}` : SITE_NAME;
 
   return (
-    <article className={`flex flex-col overflow-hidden rounded-2xl border-2 bg-slip-paper shadow-lg ${slip.tier === "vip" ? "border-vip" : "border-slip-navy"}`}>
+    <article className="flex flex-col overflow-hidden rounded-2xl border-2 border-slip-navy bg-slip-paper shadow-lg">
       <div className="flex items-center justify-between gap-4 border-b-2 border-slip-gold bg-slip-navy p-4 text-white">
-        <div className="min-w-0 space-y-2">
-          <TierBadge tier={slip.tier} t={t.common} />
-          <h3 className="text-lg font-bold leading-snug">{title}</h3>
-        </div>
+        <h3 className="min-w-0 text-lg font-bold leading-snug">{title}</h3>
         <ConfidenceMeter value={slip.confidence} label={t.common.confidence} size={64} />
       </div>
 

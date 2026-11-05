@@ -1,11 +1,20 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { SlipStatus } from "@/lib/types";
+import { isSport, type Sport } from "@/lib/sports";
+import type { Dictionary } from "@/lib/i18n/en";
 
-// Track record by day, week and month. A slip counts on the day it was posted (Beirut time).
-// "Won" means fully won; partly won and lost slips count against, voids are left out of the win rate.
+// Track record by day, week and month, for slips or for predictions (all sports or one).
+// A slip or prediction counts on the day it was posted (Beirut time).
+// "Won" means fully won; partly won and lost count against, voids are left out of the win rate.
 
 export const STATS_TIMEZONE = "Asia/Beirut";
+
+export type StatsSource = "slips" | "predictions" | Sport;
+export const isStatsSource = (v: unknown): v is StatsSource => v === "slips" || v === "predictions" || isSport(v);
+
+// The stats texts talk about slips; predictions get the same sentences about picks.
+export const statsText = (t: Dictionary, source: StatsSource): Dictionary["stats"] => (source === "slips" ? t.stats : { ...t.stats, ...t.statsPicks });
 
 export type Tally = { won: number; total: number; voids: number; rate: number | null };
 export type DayTally = Tally & { day: string; open: number };
@@ -46,21 +55,21 @@ function add(t: Tally, status: SlipStatus) {
 
 export type TrackRecord = Awaited<ReturnType<typeof trackRecord>>;
 
-export async function trackRecord() {
+export async function trackRecord(source: StatsSource = "predictions") {
   const supabase = await createClient();
   const since = new Date(Date.now() - 400 * 86400_000).toISOString();
-  // RLS lets everyone read settled slips; open slips only come through as counts.
-  const [{ data }, { data: teasers }] = await Promise.all([
-    supabase
-      .from("slips")
-      .select("status, publish_at, settled_at, total_odds")
-      .neq("status", "pending")
-      .gte("publish_at", since)
-      .order("publish_at", { ascending: false })
-      .limit(5000),
-    supabase.rpc("slip_teasers"),
-  ]);
-  const rows = (data ?? []) as Row[];
+  const slips = source === "slips";
+  // RLS lets everyone read settled slips and predictions; open ones only come through as counts.
+  let settled = supabase
+    .from(slips ? "slips" : "predictions")
+    .select(slips ? "status, publish_at, settled_at, total_odds" : "status, publish_at, settled_at, total_odds:odds")
+    .neq("status", "pending")
+    .gte("publish_at", since)
+    .order("publish_at", { ascending: false })
+    .limit(5000);
+  if (isSport(source)) settled = settled.eq("sport", source);
+  const [{ data }, { data: open }] = await Promise.all([settled, supabase.rpc(slips ? "slip_teasers" : "prediction_counts")]);
+  const rows = (data ?? []) as unknown as Row[];
   const today = dayKey(new Date());
 
   const days = new Map<string, DayTally>();
@@ -70,7 +79,9 @@ export async function trackRecord() {
     return d;
   };
   for (const r of rows) add(day(dayKey(r.publish_at)), r.status);
-  for (const t of (teasers ?? []) as { publish_at: string }[]) day(dayKey(t.publish_at)).open++;
+  if (slips) for (const t of (open ?? []) as { publish_at: string }[]) day(dayKey(t.publish_at)).open++;
+  // Open predictions are only counted per sport, so they all show on today.
+  else for (const c of (open ?? []) as { sport: Sport; open: number }[]) if (source === "predictions" || c.sport === source) day(today).open += c.open;
 
   const sum = (from: string, to: string): Tally => {
     const t = empty();

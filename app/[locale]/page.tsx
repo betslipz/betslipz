@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { resolveLocale } from "@/lib/locale";
-import { createClient } from "@/lib/supabase/server";
-import type { Plan } from "@/lib/types";
+import { PREDICTION_SPORTS, sportEmoji } from "@/lib/sports";
+import { activePlans, countText, openCounts } from "@/lib/predictions";
 import PlanCards from "@/components/PlanCards";
 import RevealSlip from "@/components/RevealSlip";
 import { featuredSlip } from "@/lib/featured";
@@ -12,13 +12,7 @@ import { InsightCards, WeekStrip } from "@/components/stats/StatsWidgets";
 
 export default async function Home({ params }: PageProps<"/[locale]">) {
   const { locale, t } = await resolveLocale(params);
-  const supabase = await createClient();
-  const [{ data: plans }, record, featured, session] = await Promise.all([
-    supabase.from("plans").select("*").eq("active", true).order("price_usd"),
-    trackRecord(),
-    featuredSlip(),
-    getSession(),
-  ]);
+  const [plans, record, featured, session, counts] = await Promise.all([activePlans(), trackRecord("predictions"), featuredSlip(), getSession(), openCounts()]);
 
   return (
     <>
@@ -41,6 +35,30 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           </div>
 
           <RevealSlip featured={featured} session={session} gift={giftState(session)} locale={locale} t={t} />
+        </div>
+      </section>
+
+      <section className="page-wrap pt-12">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <h2 className="text-3xl font-black">{t.predictions.homeTitle}</h2>
+          <Link href={`/${locale}/predictions`} className="btn btn-ghost">
+            {t.predictions.title} <span className="inline-block rtl:rotate-180">→</span>
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {PREDICTION_SPORTS.map((s) => (
+            <Link key={s} href={`/${locale}/predictions/${s}`} className="card flex items-center gap-3 p-4 transition hover:-translate-y-0.5 hover:border-accent">
+              <span className="text-3xl" aria-hidden>
+                {sportEmoji(s)}
+              </span>
+              <span className="min-w-0">
+                <span className="block font-black">{t.live.sports[s]}</span>
+                <span className="block truncate text-sm text-muted">
+                  {countText(counts[s], t.predictions)}
+                </span>
+              </span>
+            </Link>
+          ))}
         </div>
       </section>
 
@@ -77,7 +95,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       <section id="pricing" className="page-wrap scroll-mt-20 py-12">
         <h2 className="text-3xl font-black">{t.landing.pricingTitle}</h2>
         <p className="mb-8 mt-2 text-muted">{t.landing.pricingSubtitle}</p>
-        <PlanCards plans={(plans ?? []) as Plan[]} locale={locale} t={t} />
+        <PlanCards plans={plans} locale={locale} t={t} />
       </section>
 
       <section className="page-wrap py-12">

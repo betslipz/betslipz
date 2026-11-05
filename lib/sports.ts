@@ -20,3 +20,10 @@ export const SPORTS = [
 export type SportKey = (typeof SPORTS)[number]["key"];
 
 export const flashscoreUrl = (slug: string) => `https://www.flashscore.com/${slug}`;
+
+// The four sports we publish predictions for; each can be bought as its own plan.
+export const PREDICTION_SPORTS = ["football", "basketball", "tennis", "darts"] as const satisfies readonly SportKey[];
+export type Sport = (typeof PREDICTION_SPORTS)[number];
+
+export const isSport = (value: unknown): value is Sport => typeof value === "string" && (PREDICTION_SPORTS as readonly string[]).includes(value);
+export const sportEmoji = (key: SportKey) => SPORTS.find((s) => s.key === key)?.emoji ?? "";

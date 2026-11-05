@@ -1,11 +1,13 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import type { Teaser } from "@/components/LockedSlip";
+import { teaserState, type Teaser } from "@/components/LockedSlip";
 
-// Today's slip for the home page teaser: the newest open slip. Only its tier, number of picks and total odds leave the database.
+// The slip for the home page teaser: the newest open slip that can still be bought (else the newest open one).
+// Only its number of picks, total odds and price leave the database.
 export async function featuredSlip(): Promise<{ teaser: Teaser } | null> {
   const supabase = await createClient();
-  const { data: teasers } = await supabase.rpc("slip_teasers");
-  if (!teasers?.length) return null;
-  return { teaser: teasers[0] as Teaser };
+  const { data } = await supabase.rpc("slip_teasers");
+  const teasers = (data ?? []) as Teaser[];
+  const teaser = teasers.find((x) => teaserState(x, false) === "buy") ?? teasers[0];
+  return teaser ? { teaser } : null;
 }

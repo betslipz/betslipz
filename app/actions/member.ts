@@ -31,13 +31,21 @@ export async function submitPayment(_: FormState, formData: FormData): Promise<F
   if (formData.get("accept") !== "on") return { error: t.subscribe.acceptRequired };
 
   const allowedMethods = process.env.NODE_ENV === "production" ? ["whish", "omt", "usdt", "cash"] : ["whish", "omt", "usdt", "cash", "mock"];
+  // A payment buys either a plan or one slip.
   const parsed = z
     .object({
-      planId: z.coerce.number().int().positive(),
+      planId: z.coerce.number().int().positive().optional(),
+      slipId: z.string().uuid().optional(),
       method: z.enum(allowedMethods as [string, ...string[]]),
       reference: z.string().trim().min(2).max(120),
     })
-    .safeParse({ planId: formData.get("planId"), method: formData.get("method"), reference: formData.get("reference") });
+    .refine((v) => !!v.planId !== !!v.slipId)
+    .safeParse({
+      planId: formData.get("planId") || undefined,
+      slipId: formData.get("slipId") || undefined,
+      method: formData.get("method"),
+      reference: formData.get("reference"),
+    });
   if (!parsed.success) return { error: t.common.error };
 
   const supabase = await createClient();
@@ -53,17 +61,22 @@ export async function submitPayment(_: FormState, formData: FormData): Promise<F
     if (error) return { error: t.common.error };
   }
 
-  // Amount and status are set by a database trigger, not trusted from the form.
+  // Amount and status are set by a database trigger, not trusted from the form. It also refuses slips that started.
   const { error } = await supabase.from("payments").insert({
     user_id: session.userId,
-    plan_id: parsed.data.planId,
+    plan_id: parsed.data.planId ?? null,
+    slip_id: parsed.data.slipId ?? null,
     method: parsed.data.method,
     reference: parsed.data.reference,
     proof_path: proofPath,
   });
-  if (error) return { error: error.message.includes("Too many") ? error.message : t.common.error };
+  if (error) {
+    if (error.message.includes("Too many")) return { error: error.message };
+    return { error: /Slip/.test(error.message) ? t.subscribe.slipUnavailable : t.common.error };
+  }
 
   revalidatePath(`/${locale}/account`);
+  revalidatePath(`/${locale}/slips`);
   return { message: t.subscribe.submitted };
 }
 

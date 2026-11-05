@@ -2,8 +2,8 @@ import Link from "next/link";
 import { resolveLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { SLIP_SELECT, type Slip } from "@/lib/types";
-import { fmtDate, fmtOdds } from "@/lib/format";
-import StatusBadge, { TierBadge } from "@/components/StatusBadge";
+import { fmtDate, fmtOdds, fmtUsd } from "@/lib/format";
+import StatusBadge from "@/components/StatusBadge";
 import { settleSlip, deleteSlip } from "@/app/actions/admin";
 import ConfirmButton from "@/components/admin/ConfirmButton";
 
@@ -28,7 +28,9 @@ export default async function AdminSlips({ params }: PageProps<"/[locale]/admin/
         return (
           <details key={s.id} className="card group">
             <summary className="flex cursor-pointer list-none flex-wrap items-center gap-3 p-4">
-              <TierBadge tier={s.tier} t={t.common} />
+              <span className="rounded-md bg-accent/15 px-2 py-0.5 text-xs font-bold text-accent" dir="ltr">
+                {fmtUsd(s.price_usd)}
+              </span>
               <StatusBadge status={s.status} t={t.common} />
               {scheduled && <span className="rounded bg-warning/15 px-2 py-0.5 text-xs font-bold text-warning">⏱ {fmtDate(s.publish_at, locale)}</span>}
               <b className="min-w-0 flex-1 truncate">{s.title_en}</b>

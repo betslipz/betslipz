@@ -6,6 +6,7 @@ import type { Dictionary } from "@/lib/i18n/en";
 import type { Plan } from "@/lib/types";
 import { savePrices, savePaymentMethods, saveContact } from "@/app/actions/admin";
 import { FormMessage, Submit } from "@/components/AuthForms";
+import { planLabel } from "@/lib/plans";
 
 export function PricesForm({ locale, t, plans }: { locale: Locale; t: Dictionary; plans: Plan[] }) {
   const [state, action] = useActionState(savePrices, undefined);
@@ -17,7 +18,7 @@ export function PricesForm({ locale, t, plans }: { locale: Locale; t: Dictionary
         {plans.map((p) => (
           <div key={p.id} className="rounded-xl border border-border p-3">
             <p className={`text-sm font-bold ${p.tier === "vip" ? "text-vip" : "text-accent"}`}>
-              {t.common[p.tier]} · {t.common[p.duration]}
+              {planLabel(p, t)}
             </p>
             <input name={`price:${p.id}`} type="number" step="0.01" min="0" defaultValue={p.price_usd} className="input mt-2" dir="ltr" />
             <label className="mt-2 flex items-center gap-2 text-sm text-muted">

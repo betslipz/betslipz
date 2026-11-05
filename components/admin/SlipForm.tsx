@@ -7,37 +7,22 @@ import type { Slip } from "@/lib/types";
 import { saveSlip } from "@/app/actions/admin";
 import { FormMessage, Submit } from "@/components/AuthForms";
 import ConfidenceMeter from "@/components/ConfidenceMeter";
+import { MARKETS as SPORT_MARKETS, OTHER, chip, joinEvent, splitEvent, toIso, toLocalInput } from "./form-helpers";
 
 type LegDraft = { home: string; away: string; market: string; customMarket: string; pick: string; odds: string; kickoff: string };
 type Mode = "typed" | "image";
 
-// Common markets and their one-tap picks. Stored text stays in English so slips read the same everywhere.
-const MARKETS: { name: string; picks: (home: string, away: string) => string[] }[] = [
-  { name: "1X2", picks: (h, a) => [h || "Home", "Draw", a || "Away"] },
-  { name: "Double chance", picks: () => ["1X", "X2", "12"] },
-  { name: "Over/Under", picks: () => ["Over 1.5", "Over 2.5", "Over 3.5", "Under 2.5", "Under 3.5"] },
-  { name: "BTTS", picks: () => ["Yes", "No"] },
-  { name: "Draw no bet", picks: (h, a) => [h || "Home", a || "Away"] },
-  { name: "Handicap", picks: () => [] },
-];
-const OTHER = "__other";
-
-// <input type="datetime-local"> works in the browser's local time; convert at the edges.
-function toLocalInput(iso: string | null | undefined) {
-  if (!iso) return "";
-  const d = new Date(iso);
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-}
-const toIso = (local: string) => (local ? new Date(local).toISOString() : null);
+// Slips use the football markets; the "Other…" chip covers anything else.
+const MARKETS = SPORT_MARKETS.football;
 
 const emptyLeg = (): LegDraft => ({ home: "", away: "", market: "1X2", customMarket: "", pick: "", odds: "", kickoff: "" });
 
 function toDraft(l: Slip["slip_legs"][number], keepKickoff: boolean): LegDraft {
-  const [home, ...rest] = l.event.split(/\s+vs\.?\s+/i);
+  const [home, away] = splitEvent(l.event);
   const preset = MARKETS.some((m) => m.name === l.market);
   return {
     home,
-    away: rest.join(" vs "),
+    away,
     market: preset ? l.market : OTHER,
     customMarket: preset ? "" : l.market,
     pick: l.pick,
@@ -47,10 +32,10 @@ function toDraft(l: Slip["slip_legs"][number], keepKickoff: boolean): LegDraft {
 }
 
 // legs = 0 means a screenshot slip, whose number of picks we don't know.
-function autoTitle(names: Dictionary["admin"]["slipNames"], tierLabel: string, legs: number, tierFirst: boolean) {
+function autoTitle(names: Dictionary["admin"]["slipNames"], legs: number) {
   const kind =
     legs === 0 ? names.slip : legs === 1 ? names[1] : legs === 2 ? names[2] : legs === 3 ? names[3] : names.n.replace("{n}", String(legs));
-  return tierFirst ? `${tierLabel} ${kind}` : `${kind} ${tierLabel}`;
+  return kind.charAt(0).toUpperCase() + kind.slice(1);
 }
 
 export default function SlipForm({
@@ -76,7 +61,6 @@ export default function SlipForm({
   const source = slip ?? template;
   const [state, action] = useActionState(saveSlip, undefined);
   const [mode, setMode] = useState<Mode>(source && source.slip_legs.length === 0 ? "image" : "typed");
-  const [tier, setTier] = useState<"regular" | "vip">(source?.tier ?? "regular");
   const [confidence, setConfidence] = useState(source?.confidence ?? 70);
   const [publishAt, setPublishAt] = useState(toLocalInput(slip?.publish_at ?? new Date().toISOString()));
   const [manualOdds, setManualOdds] = useState(source && source.slip_legs.length === 0 ? String(source.total_odds) : "");
@@ -87,8 +71,8 @@ export default function SlipForm({
 
   const total = mode === "image" ? Number(manualOdds) || 1 : legs.reduce((acc, l) => acc * (Number(l.odds) >= 1 ? Number(l.odds) : 1), 1);
   const legCount = mode === "image" ? 0 : legs.length;
-  const titleEnAuto = autoTitle(tEn, tier === "vip" ? "VIP" : "Regular", legCount, true);
-  const titleArAuto = autoTitle(tAr, tier === "vip" ? "VIP" : "عادي", legCount, false);
+  const titleEnAuto = autoTitle(tEn, legCount);
+  const titleArAuto = autoTitle(tAr, legCount);
 
   const update = (i: number, patch: Partial<LegDraft>) => setLegs(legs.map((l, j) => (j === i ? { ...l, ...patch } : l)));
   const addLeg = () => {
@@ -99,7 +83,7 @@ export default function SlipForm({
     mode === "image"
       ? []
       : legs.map((l) => ({
-          event: l.away.trim() ? `${l.home.trim()} vs ${l.away.trim()}` : l.home.trim(),
+          event: joinEvent(l.home, l.away),
           market: l.market === OTHER ? l.customMarket : l.market,
           pick: l.pick,
           odds: Number(l.odds),
@@ -113,18 +97,12 @@ export default function SlipForm({
     d.setHours(12, 0, 0, 0);
     setPublishAt(toLocalInput(d.toISOString()));
   };
-  const chip = (active: boolean) =>
-    `rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
-      active ? "border-accent bg-accent/15 text-accent" : "border-border text-muted hover:border-muted hover:text-text"
-    }`;
-
   return (
     <form action={action} className="space-y-6">
       <input type="hidden" name="locale" value={locale} />
       {slip && <input type="hidden" name="id" value={slip.id} />}
       <input type="hidden" name="mode" value={mode} />
       <input type="hidden" name="legs" value={legsJson} />
-      <input type="hidden" name="tier" value={tier} />
       <input type="hidden" name="confidence" value={confidence} />
       <input type="hidden" name="publish_at" value={toIso(publishAt) ?? new Date().toISOString()} />
       <input type="hidden" name="title_en_auto" value={titleEnAuto} />
@@ -144,28 +122,12 @@ export default function SlipForm({
         ))}
       </div>
 
-      {/* 2. Tier + publish time */}
+      {/* 2. Price + publish time */}
       <div className="card grid gap-4 p-5 md:grid-cols-2">
         <div>
-          <span className="label">{t.admin.tier}</span>
-          <div className="flex gap-2">
-            {(["regular", "vip"] as const).map((v) => (
-              <button
-                key={v}
-                type="button"
-                onClick={() => setTier(v)}
-                className={`flex-1 rounded-lg border p-2.5 text-center font-bold ${
-                  tier === v
-                    ? v === "vip"
-                      ? "border-vip bg-vip/15 text-vip"
-                      : "border-accent bg-accent/15 text-accent"
-                    : "border-border text-muted"
-                }`}
-              >
-                {v === "vip" ? `★ ${t.common.vip}` : t.common.regular}
-              </button>
-            ))}
-          </div>
+          <label className="label" htmlFor="price">{t.admin.price}</label>
+          <input id="price" name="price_usd" type="number" step="0.5" min="0" max="1000" defaultValue={source?.price_usd ?? 3} className="input max-w-40 text-lg font-bold" required dir="ltr" />
+          <p className="mt-1 text-xs text-muted">{t.admin.priceHint}</p>
         </div>
         <div>
           <label className="label" htmlFor="publish">{t.admin.publishAt}</label>
