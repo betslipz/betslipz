@@ -53,7 +53,18 @@ for (const code of flags) {
 
 // 2. Crests: one name search per club (the free key allows ~30 lookups a minute).
 const { data: existing } = await db.from("teams").select("sport, name, logo_url");
-const hasLogo = new Set((existing ?? []).filter((t) => t.logo_url).map((t) => `${t.sport}:${t.name}`));
+const knownLogo = new Map((existing ?? []).filter((t) => t.logo_url).map((t) => [`${t.sport}:${t.name}`, t.logo_url]));
+// Crests already copied into storage by an earlier run are reused without asking the API again.
+for (const sport of ["football", "basketball"]) {
+  const { data: files } = await db.storage.from(BUCKET).list(`logos/${sport}`, { limit: 1000 });
+  for (const r of rows.filter((x) => x.sport === sport)) {
+    if (!knownLogo.has(`${sport}:${r.name}`) && files?.some((f) => f.name === `${slug(r.name)}.png`)) {
+      knownLogo.set(`${sport}:${r.name}`, publicUrl(`logos/${sport}/${slug(r.name)}.png`));
+    }
+  }
+}
+for (const r of rows) if (knownLogo.has(`${r.sport}:${r.name}`)) r.logo_url = knownLogo.get(`${r.sport}:${r.name}`);
+const hasLogo = new Set(knownLogo.keys());
 const SPORT = { football: "Soccer", basketball: "Basketball" };
 let found = 0;
 let missing = [];
@@ -88,10 +99,11 @@ for (const r of rows) {
   }
 }
 
-// 3. Save everything (keeps an existing crest when none was found this time).
-const toSave = rows.map(({ search, ...r }) => r);
+// 3. Save everything. Every row carries logo_url (the found or earlier crest, else null): in a bulk upsert,
+// a key missing from some rows would be written as null for them.
+const toSave = rows.map(({ search, ...r }) => ({ ...r, logo_url: r.logo_url ?? null }));
 for (let i = 0; i < toSave.length; i += 200) {
-  const chunk = toSave.slice(i, i + 200).map((r) => (r.logo_url ? r : (({ logo_url, ...rest }) => rest)(r)));
+  const chunk = toSave.slice(i, i + 200);
   const { error } = await db.from("teams").upsert(chunk, { onConflict: "sport,name" });
   if (error) throw error;
 }
