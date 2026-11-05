@@ -3,7 +3,12 @@
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { adminEmail, sendEmail } from "@/lib/email";
+import { adminPaymentEmail } from "@/lib/emails";
+import { planLabel } from "@/lib/plans";
+import type { Sport } from "@/lib/sports";
+import { fmtUsd } from "@/lib/format";
 import { getSession } from "@/lib/auth";
 import { isLocale, type Locale } from "@/lib/config";
 import { getDictionary } from "@/lib/i18n";
@@ -74,10 +79,44 @@ export async function submitPayment(_: FormState, formData: FormData): Promise<F
     if (error.message.includes("Too many")) return { error: error.message };
     return { error: /Slip/.test(error.message) ? t.subscribe.slipUnavailable : t.common.error };
   }
+  await notifyAdmin(session.userId, session.email, parsed.data, proofPath !== null);
 
   revalidatePath(`/${locale}/account`);
   revalidatePath(`/${locale}/slips`);
   return { message: t.subscribe.submitted };
+}
+
+// Emails the admin about every new payment so it can be checked and approved quickly.
+async function notifyAdmin(userId: string, email: string, p: { planId?: number; slipId?: string; method: string; reference: string }, hasReceipt: boolean) {
+  const service = createServiceClient();
+  const en = getDictionary("en");
+  const [{ data: profile }, { data: payment }] = await Promise.all([
+    service.from("profiles").select("full_name, phone").eq("id", userId).maybeSingle(),
+    service
+      .from("payments")
+      .select("amount_usd, plans(tier, sport, duration), slips(title_en, slip_legs(kickoff_at))")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+  const plan = payment?.plans as unknown as { tier: "regular" | "vip"; sport: Sport | null; duration: "week" | "month" | "quarter" | "year" } | null;
+  const slip = payment?.slips as unknown as { title_en: string; slip_legs: { kickoff_at: string | null }[] } | null;
+  const firstKickoff = slip?.slip_legs.map((l) => l.kickoff_at).filter((k): k is string => !!k).sort()[0];
+  await sendEmail({
+    to: adminEmail(),
+    ...adminPaymentEmail({
+      buyer: email,
+      buyerName: profile?.full_name ?? null,
+      phone: profile?.phone ?? null,
+      item: plan ? planLabel(plan, en) : slip ? `Slip: ${slip.title_en}` : p.slipId ? "Slip" : "Plan",
+      amount: fmtUsd(Number(payment?.amount_usd ?? 0)),
+      method: (en.subscribe.methods as Record<string, string>)[p.method] ?? p.method,
+      reference: p.reference,
+      hasReceipt,
+      warning: firstKickoff ? `The slip's first game starts ${new Date(firstKickoff).toLocaleString("en-GB", { timeZone: "Asia/Beirut", dateStyle: "medium", timeStyle: "short" })} (Beirut time). Approve before then if you can.` : undefined,
+    }),
+  });
 }
 
 export async function updateProfile(_: FormState, formData: FormData): Promise<FormState> {

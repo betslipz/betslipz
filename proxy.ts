@@ -7,7 +7,7 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const first = pathname.split("/")[1];
 
-  if (!isLocale(first) && !pathname.startsWith("/auth")) {
+  if (!isLocale(first) && !pathname.startsWith("/auth") && !pathname.startsWith("/api")) {
     const preferred = request.cookies.get("locale")?.value;
     const accept = request.headers.get("accept-language") ?? "";
     const locale = preferred && isLocale(preferred) ? preferred : accept.startsWith("ar") ? "ar" : DEFAULT_LOCALE;

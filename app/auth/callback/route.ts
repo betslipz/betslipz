@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sendWelcomeOnce } from "@/lib/welcome";
 
 // Landing point for email confirmation and password-reset links.
 export async function GET(request: NextRequest) {
@@ -10,10 +11,11 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
       // Email confirmation and password reset log in too: this device becomes the account's only login.
       await supabase.rpc("claim_session");
+      await sendWelcomeOnce(data.user.id);
       return NextResponse.redirect(`${origin}${next}`);
     }
   }

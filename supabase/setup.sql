@@ -1,5 +1,5 @@
 -- ONE-TIME SETUP: paste this whole file into Supabase → SQL Editor → Run.
--- Generated from supabase/migrations/0001_schema.sql + supabase/seed.sql + migrations 0002 to 0005
+-- Generated from supabase/migrations/0001_schema.sql + supabase/seed.sql + migrations 0002 to 0006
 
 -- =============================================================
 -- Betting slips subscription site: schema, RLS and storage rules
@@ -931,3 +931,14 @@ drop function if exists public.track_record(int);
 alter table public.slips drop column if exists tier;
 
 -- Old Regular plans (no sport) stay switched off; payments and subscriptions from before still point at them.
+
+-- =============================================================
+-- Remembers which plans already got their "your plan ends soon"
+-- email, so the daily reminder job sends it only once.
+-- Paste into Supabase → SQL Editor → Run. Safe to run twice.
+-- =============================================================
+
+alter table public.subscriptions add column if not exists reminder_sent_at timestamptz;
+
+-- The daily job looks for plans ending soon that haven't been reminded.
+create index if not exists subscriptions_reminder_due on public.subscriptions (ends_at) where reminder_sent_at is null and not revoked;

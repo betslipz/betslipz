@@ -2,7 +2,10 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { sendEmail } from "@/lib/email";
+import { resetEmail } from "@/lib/emails";
+import { sendWelcomeOnce } from "@/lib/welcome";
 import { isLocale, type Locale } from "@/lib/config";
 import { getDictionary } from "@/lib/i18n";
 
@@ -34,9 +37,10 @@ export async function login(_: FormState, formData: FormData): Promise<FormState
   if (!parsed.success) return { error: t.auth.invalid };
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) return { error: error.status === 429 ? error.message : t.auth.invalid };
   await supabase.rpc("claim_session");
+  await sendWelcomeOnce(data.user.id);
   redirect(safeNext(formData.get("next"), locale));
 }
 
@@ -60,8 +64,9 @@ export async function signup(_: FormState, formData: FormData): Promise<FormStat
     },
   });
   if (error) return { error: error.message };
-  if (data.session) {
+  if (data.session && data.user) {
     await supabase.rpc("claim_session");
+    await sendWelcomeOnce(data.user.id);
     redirect(`/${locale}/slips`);
   }
   return { message: t.auth.checkEmail };
@@ -72,13 +77,31 @@ export async function requestReset(_: FormState, formData: FormData): Promise<Fo
   const t = getDictionary(locale);
   const email = z.string().trim().email().safeParse(formData.get("email"));
   if (email.success) {
-    const supabase = await createClient();
-    await supabase.auth.resetPasswordForEmail(email.data, {
-      redirectTo: `${siteUrl()}/auth/callback?next=/${locale}/update-password`,
-    });
+    if (process.env.RESEND_API_KEY) await sendResetEmail(email.data, locale);
+    else {
+      // Without Resend, fall back to Supabase's own (heavily rate-limited) mailer.
+      const supabase = await createClient();
+      await supabase.auth.resetPasswordForEmail(email.data, {
+        redirectTo: `${siteUrl()}/auth/callback?next=/${locale}/update-password`,
+      });
+    }
   }
   // Same answer either way, so the form can't be used to discover registered emails.
   return { message: t.auth.resetSent };
+}
+
+// The reset link is made with the service role and emailed through Resend in the visitor's language.
+// It opens /auth/confirm, which checks the one-time token and logs the visitor in to choose a new password.
+async function sendResetEmail(email: string, locale: Locale) {
+  const service = createServiceClient();
+  const { data, error } = await service.auth.admin.generateLink({ type: "recovery", email });
+  if (error || !data.user || !data.properties?.hashed_token) return; // unknown email: say nothing
+  // At most one reset email a minute per account, so the form can't be used to flood someone's inbox.
+  const last = Date.parse(String(data.user.app_metadata?.reset_email_at ?? ""));
+  if (Date.now() - last < 60_000) return;
+  await service.auth.admin.updateUserById(data.user.id, { app_metadata: { ...data.user.app_metadata, reset_email_at: new Date().toISOString() } });
+  const link = `${siteUrl()}/auth/confirm?token_hash=${encodeURIComponent(data.properties.hashed_token)}&type=recovery&next=/${locale}/update-password`;
+  await sendEmail({ to: email, ...resetEmail(locale, link) });
 }
 
 export async function updatePassword(_: FormState, formData: FormData): Promise<FormState> {
