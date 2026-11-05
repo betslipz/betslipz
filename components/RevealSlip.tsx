@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { Locale } from "@/lib/config";
 import type { Dictionary } from "@/lib/i18n/en";
@@ -8,9 +7,17 @@ import type { Teaser } from "./LockedSlip";
 import { fmtOdds } from "@/lib/format";
 import { TierBadge } from "./StatusBadge";
 import ConfidenceMeter from "./ConfidenceMeter";
+import SlipPaper from "./SlipPaper";
 
-// Home page hero: today's slip, blurred, with a Reveal button that leads to payment.
-// The preview is blurred on the server (see lib/featured.ts); typed slips show a drawn placeholder instead of real picks.
+// Stand-in picks drawn under the blur: the real ones never reach visitors who haven't unlocked them.
+const PLACEHOLDER_LEGS = [
+  { event: "Team A vs Team B", market: "Double chance", pick: "1X", odds: 1.5 },
+  { event: "Team C vs Team D", market: "1X2", pick: "Team C", odds: 1.24 },
+  { event: "Team E vs Team F", market: "Over/Under", pick: "Over 2.5", odds: 1.72 },
+  { event: "Team G vs Team H", market: "Double chance", pick: "X2", odds: 1.32 },
+].map((l) => ({ ...l, kickoff_at: null, result: "pending" as const }));
+
+// Home page hero: today's slip as a blurred ticket, with a Reveal button that leads to payment.
 export default function RevealSlip({
   featured,
   session,
@@ -18,7 +25,7 @@ export default function RevealSlip({
   locale,
   t,
 }: {
-  featured: { teaser: Teaser; preview: string | null } | null;
+  featured: { teaser: Teaser } | null;
   session: Session | null;
   gift: GiftState;
   locale: Locale;
@@ -35,38 +42,27 @@ export default function RevealSlip({
   const href = entitled ? `/${locale}/slips` : free ? `/${locale}/${session ? "slips" : "signup"}` : `/${locale}/subscribe${vip ? "?tier=vip" : ""}`;
 
   return (
-    <div className={`card relative overflow-hidden shadow-2xl shadow-accent/10 ${vip ? "border-vip/50" : ""}`}>
-      <div className="pointer-events-none select-none" aria-hidden>
-        {featured?.preview ? (
-          <div className="relative h-[420px]">
-            <Image src={featured.preview} alt="" fill unoptimized className="scale-110 object-cover" />
+    <div className={`relative overflow-hidden rounded-2xl border-2 shadow-2xl shadow-accent/10 ${vip ? "border-vip" : "border-slip-navy"}`}>
+      <div className="pointer-events-none blur-[5px] select-none" aria-hidden>
+        <div className="flex items-center justify-between gap-4 border-b-2 border-slip-gold bg-slip-navy p-4 text-white">
+          <div className="space-y-2">
+            <TierBadge tier={teaser?.tier ?? "vip"} t={t.common} />
+            <p className="text-lg font-bold">{t.landing.todaySlip}</p>
           </div>
-        ) : (
-          <div className="p-5 blur-[5px]">
-            <div className="flex items-center justify-between">
-              <span className="rounded-md bg-vip px-2 py-0.5 text-xs font-black text-[#1a1200]">★ VIP</span>
-              <ConfidenceMeter value={82} label={t.common.confidence} size={64} />
-            </div>
-            {["Team A vs Team B", "Team C vs Team D", "Team E vs Team F", "Team G vs Team H"].map((m, i) => (
-              <div key={m} className="mt-3 flex items-center justify-between border-t border-border pt-3">
-                <div>
-                  <p className="font-semibold" dir="ltr">
-                    {m}
-                  </p>
-                  <p className="text-sm text-muted">{["1X2 · Home", "BTTS · Yes", "Over 2.5", "Double chance"][i]}</p>
-                </div>
-                <span className="rounded-md bg-surface-2 px-2 py-1 font-mono text-sm font-bold">{["1.65", "1.80", "1.72", "1.40"][i]}</span>
-              </div>
-            ))}
-            <div className="mt-4 flex justify-between border-t border-border pt-3 text-sm">
-              <span className="text-muted">{t.common.totalOdds}</span>
-              <b className="text-accent">7.15</b>
-            </div>
-          </div>
-        )}
+          <ConfidenceMeter value={82} label={t.common.confidence} size={56} />
+        </div>
+        <SlipPaper
+          status="pending"
+          legs={PLACEHOLDER_LEGS.slice(0, Math.min(Math.max(teaser?.legs || 4, 2), 4))}
+          publishAt={new Date().toISOString()}
+          totalOdds={teaser?.total_odds ?? 7.15}
+          stakeUnits={1}
+          locale={locale}
+          t={t.common}
+        />
       </div>
 
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-b from-bg/30 via-bg/50 to-bg/80 p-6 text-center">
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-b from-bg/50 via-bg/75 to-bg/90 p-6 text-center">
         <span className="inline-flex items-center gap-2 rounded-full bg-danger px-3 py-1 text-xs font-bold text-white shadow">
           <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
           {teaser ? t.landing.todaySlip : t.landing.sampleSlip}

@@ -13,6 +13,17 @@
   --vip: #f5b301; /* gold */
   --danger: #ef4444;
   --warning: #f59e0b;
+
+  /* Bet slips are drawn as a light sportsbook ticket on the dark site. */
+  --slip-paper: #ffffff;
+  --slip-row: #eeeefb;
+  --slip-line: #cdd0e4;
+  --slip-ink: #1b1f4b;
+  --slip-navy: #1e2160;
+  --slip-gold: #d9a521;
+  --slip-amber: #9a6600; /* gold dark enough for text on white */
+  --slip-win: #0f9d47;
+  --slip-loss: #d63a40;
 }
 
 @theme inline {
@@ -27,6 +38,15 @@
   --color-vip: var(--vip);
   --color-danger: var(--danger);
   --color-warning: var(--warning);
+  --color-slip-paper: var(--slip-paper);
+  --color-slip-row: var(--slip-row);
+  --color-slip-line: var(--slip-line);
+  --color-slip-ink: var(--slip-ink);
+  --color-slip-navy: var(--slip-navy);
+  --color-slip-gold: var(--slip-gold);
+  --color-slip-amber: var(--slip-amber);
+  --color-slip-win: var(--slip-win);
+  --color-slip-loss: var(--slip-loss);
   --font-sans: var(--font-inter), var(--font-cairo), system-ui, sans-serif;
   --font-arabic: var(--font-cairo), var(--font-inter), system-ui, sans-serif;
 }
