@@ -1,13 +1,14 @@
-import Image from "next/image";
-import { BETARABIA_URL, type Locale } from "@/lib/config";
+import { getSession } from "@/lib/auth";
+import { BETARABIA_URL, SITE_NAME, type Locale } from "@/lib/config";
 import type { Dictionary } from "@/lib/i18n/en";
 import type { Slip } from "@/lib/types";
 import ConfidenceMeter from "./ConfidenceMeter";
 import { TierBadge } from "./StatusBadge";
 import CopyButton from "./CopyButton";
 import SlipPaper from "./SlipPaper";
+import ProtectedImage from "./ProtectedImage";
 
-export default function SlipCard({
+export default async function SlipCard({
   slip,
   locale,
   t,
@@ -25,6 +26,9 @@ export default function SlipCard({
   const legs = [...slip.slip_legs].sort((a, b) => a.position - b.position);
   // Screenshot-only slips have no typed picks: the image takes their place.
   const imageOnly = legs.length === 0 && !!imageUrl;
+  // Tiled across slip screenshots, so a leaked picture points back to the account it came from.
+  const viewer = imageUrl ? await getSession() : null;
+  const watermark = viewer ? `${viewer.email} · ${new Date().toISOString().slice(0, 10)}` : SITE_NAME;
 
   return (
     <article className={`flex flex-col overflow-hidden rounded-2xl border-2 bg-slip-paper shadow-lg ${slip.tier === "vip" ? "border-vip" : "border-slip-navy"}`}>
@@ -47,7 +51,7 @@ export default function SlipCard({
       >
         {imageOnly ? (
           <div className="border-t border-slip-line bg-slip-row p-2">
-            <Image src={imageUrl} alt={title} width={800} height={1000} unoptimized className="h-auto w-full rounded" />
+            <ProtectedImage src={imageUrl} alt={title} watermark={watermark} />
           </div>
         ) : undefined}
       </SlipPaper>
@@ -61,7 +65,7 @@ export default function SlipCard({
             </div>
           )}
           {imageUrl && !imageOnly && (
-            <Image src={imageUrl} alt={title} width={800} height={600} unoptimized className="h-auto w-full rounded-lg border border-border" />
+            <ProtectedImage src={imageUrl} alt={title} watermark={watermark} className="overflow-hidden rounded-lg border border-border" />
           )}
         </div>
       )}
