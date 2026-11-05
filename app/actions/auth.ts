@@ -36,6 +36,7 @@ export async function login(_: FormState, formData: FormData): Promise<FormState
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) return { error: error.status === 429 ? error.message : t.auth.invalid };
+  await supabase.rpc("claim_session");
   redirect(safeNext(formData.get("next"), locale));
 }
 
@@ -59,7 +60,10 @@ export async function signup(_: FormState, formData: FormData): Promise<FormStat
     },
   });
   if (error) return { error: error.message };
-  if (data.session) redirect(`/${locale}/slips`);
+  if (data.session) {
+    await supabase.rpc("claim_session");
+    redirect(`/${locale}/slips`);
+  }
   return { message: t.auth.checkEmail };
 }
 

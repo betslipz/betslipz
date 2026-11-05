@@ -212,6 +212,7 @@ const en = {
     ageConfirm: "I confirm I am 18 or older and accept the terms.",
     invalid: "Wrong email or password.",
     passwordHint: "At least 8 characters.",
+    loggedOutElsewhere: "You were logged out because your account was just logged in on another device. One account works on one device at a time.",
   },
   slips: {
     title: "Today's slips",

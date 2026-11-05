@@ -1,5 +1,6 @@
 import "server-only";
 import { cache } from "react";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Locale } from "@/lib/config";
@@ -25,10 +26,16 @@ export const getSession = cache(async (): Promise<Session | null> => {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const [{ data: profile }, { data: tier }] = await Promise.all([
+  const [{ data: profile }, { data: tier }, { data: current }] = await Promise.all([
     supabase.from("profiles").select("full_name, role, banned").eq("id", user.id).single(),
     supabase.rpc("current_tier"),
+    supabase.rpc("session_is_current"),
   ]);
+  // One login at a time: this account has since logged in on another device, so this one is logged out.
+  if (current === false) {
+    const locale = (await headers()).get("x-locale");
+    redirect(`/auth/elsewhere${locale ? `?locale=${locale}` : ""}`);
+  }
 
   return {
     userId: user.id,

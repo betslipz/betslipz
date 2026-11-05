@@ -16,6 +16,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Lets server code that has no route params (getSession) answer in the page's language.
+  if (isLocale(first)) request.headers.set("x-locale", first);
   let response = NextResponse.next({ request });
   const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
     cookies: {
