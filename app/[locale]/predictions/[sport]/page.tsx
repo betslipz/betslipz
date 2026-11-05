@@ -8,7 +8,7 @@ import { PREDICTION_SPORTS, isSport, sportEmoji } from "@/lib/sports";
 import { PREDICTION_SELECT, type Prediction } from "@/lib/types";
 import { activePlans, monthlyPrice, openCounts } from "@/lib/predictions";
 import { fmtUsd } from "@/lib/format";
-import PredictionCard from "@/components/PredictionCard";
+import PredictionList from "@/components/PredictionList";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/predictions/[sport]">): Promise<Metadata> {
   const { t } = await resolveLocale(params);
@@ -75,11 +75,7 @@ export default async function SportPage({ params }: PageProps<"/[locale]/predict
           {openPredictions.length === 0 ? (
             <p className="card p-8 text-center text-muted">{t.predictions.noneOpen}</p>
           ) : (
-            <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {openPredictions.map((p) => (
-                <PredictionCard key={p.id} p={p} locale={locale} t={t} />
-              ))}
-            </div>
+            <PredictionList predictions={openPredictions} locale={locale} t={t} />
           )}
         </section>
       ) : (
@@ -114,11 +110,7 @@ export default async function SportPage({ params }: PageProps<"/[locale]/predict
         {settled.length === 0 ? (
           <p className="card p-6 text-center text-muted">{t.predictions.noRecent.replace("{sport}", name)}</p>
         ) : (
-          <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {settled.map((p) => (
-              <PredictionCard key={p.id} p={p} locale={locale} t={t} />
-            ))}
-          </div>
+          <PredictionList predictions={settled} locale={locale} t={t} />
         )}
       </section>
     </div>

@@ -367,6 +367,12 @@ const ar: Dictionary = {
     buildHint: "اختر المباريات التي تعجبك وابنِ قسيمتك لدى شركة المراهنات التي تختارها.",
     recent: "آخر النتائج",
     noRecent: "لا توجد توقعات {sport} محسومة بعد.",
+    tomorrow: "غداً",
+    colTime: "الوقت",
+    colMatch: "المباراة",
+    colTip: "التوقّع",
+    colOdds: "الأودز",
+    colTrust: "الثقة",
   },
   statsPicks: {
     slipsWon: "توقعات رابحة",

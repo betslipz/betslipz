@@ -6,7 +6,7 @@ import { PREDICTION_SPORTS, isSport, sportEmoji } from "@/lib/sports";
 import { addDays, dayKey, isStatsSource, statsText, trackRecord, type StatsSource } from "@/lib/stats";
 import { fmtDay } from "@/lib/format";
 import SlipCard from "@/components/SlipCard";
-import PredictionCard from "@/components/PredictionCard";
+import PredictionList from "@/components/PredictionList";
 import { InsightCards, PeriodTotals, TallyCards, WinCalendar } from "@/components/stats/StatsWidgets";
 
 const VIEWS = ["day", "week", "month"] as const;
@@ -126,11 +126,7 @@ export default async function ResultsPage({ params, searchParams }: PageProps<"/
             ))}
           </div>
         ) : (
-          <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {predictions.map((p) => (
-              <PredictionCard key={p.id} p={p} locale={locale} t={t} />
-            ))}
-          </div>
+          <PredictionList predictions={predictions} locale={locale} t={t} showSport={source === "predictions"} />
         )}
       </section>
     </div>

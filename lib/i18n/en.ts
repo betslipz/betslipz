@@ -365,6 +365,12 @@ const en = {
     buildHint: "Pick the games you like and build your own slip at your bookmaker.",
     recent: "Recent results",
     noRecent: "No settled {sport} predictions yet.",
+    tomorrow: "Tomorrow",
+    colTime: "Time",
+    colMatch: "Match",
+    colTip: "Tip",
+    colOdds: "Odds",
+    colTrust: "Trust",
   },
   statsPicks: {
     slipsWon: "picks won",
