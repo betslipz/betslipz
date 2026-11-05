@@ -343,16 +343,9 @@ export default function SlipForm({
             ))}
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="label" htmlFor="stake">{t.common.stake} ({t.common.units})</label>
-            <input id="stake" name="stake_units" type="number" step="0.5" min="0.5" max="10" defaultValue={source?.stake_units ?? 1} className="input" required />
-          </div>
-          <div>
-            <label className="label" htmlFor="code">{t.common.bookingCode}</label>
-            <input id="code" name="betarabia_code" defaultValue={slip?.betarabia_code ?? ""} className="input font-mono" maxLength={60} dir="ltr" />
-          </div>
-          <p className="col-span-2 text-xs text-muted">{t.admin.bookingHint}</p>
+        <div>
+          <label className="label" htmlFor="stake">{t.common.stake} ({t.common.units})</label>
+          <input id="stake" name="stake_units" type="number" step="0.5" min="0.5" max="10" defaultValue={source?.stake_units ?? 1} className="input max-w-40" required />
         </div>
       </div>
 

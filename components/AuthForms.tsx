@@ -6,6 +6,7 @@ import { useFormStatus } from "react-dom";
 import type { Locale } from "@/lib/config";
 import type { Dictionary } from "@/lib/i18n/en";
 import { login, signup, requestReset, updatePassword, type FormState } from "@/app/actions/auth";
+import LinkedText from "./LinkedText";
 
 export function Submit({ children, className = "btn-primary" }: { children: React.ReactNode; className?: string }) {
   const { pending } = useFormStatus();
@@ -51,7 +52,7 @@ export function LoginForm({ locale, t, next }: Props) {
   );
 }
 
-export function SignupForm({ locale, t }: Props) {
+export function SignupForm({ locale, t, legal }: Props & { legal: Dictionary["legal"] }) {
   const [state, action] = useActionState(signup, undefined);
   return (
     <form action={action} className="space-y-4">
@@ -71,7 +72,9 @@ export function SignupForm({ locale, t }: Props) {
       </div>
       <label className="flex items-start gap-2 text-sm">
         <input type="checkbox" name="age" required className="mt-1 accent-[var(--accent)]" />
-        {t.ageConfirm}
+        <span>
+          <LinkedText text={t.ageConfirm} links={{ [legal.terms]: `/${locale}/terms`, [legal.privacy]: `/${locale}/privacy` }} />
+        </span>
       </label>
       <FormMessage state={state} />
       <Submit>{t.signupBtn}</Submit>

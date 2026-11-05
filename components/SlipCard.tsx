@@ -1,10 +1,9 @@
 import { getSession } from "@/lib/auth";
-import { BETARABIA_URL, SITE_NAME, type Locale } from "@/lib/config";
+import { SITE_NAME, type Locale } from "@/lib/config";
 import type { Dictionary } from "@/lib/i18n/en";
 import type { Slip } from "@/lib/types";
 import ConfidenceMeter from "./ConfidenceMeter";
 import { TierBadge } from "./StatusBadge";
-import CopyButton from "./CopyButton";
 import SlipPaper from "./SlipPaper";
 import ProtectedImage from "./ProtectedImage";
 
@@ -70,22 +69,6 @@ export default async function SlipCard({
         </div>
       )}
 
-      {slip.status === "pending" && (
-        <div className="mt-auto flex flex-wrap items-center gap-2 border-t border-border bg-surface p-3">
-          {slip.betarabia_code && (
-            <>
-              <span className="text-sm text-muted">{t.common.bookingCode}:</span>
-              <code className="rounded bg-bg px-2 py-1 font-mono text-sm font-bold" dir="ltr">
-                {slip.betarabia_code}
-              </code>
-              <CopyButton text={slip.betarabia_code} label={t.common.copy} copiedLabel={t.common.copied} />
-            </>
-          )}
-          <a href={BETARABIA_URL} target="_blank" rel="noopener noreferrer" className="btn btn-primary ms-auto px-3 py-1.5 text-sm">
-            {t.common.openBetArabia} ↗
-          </a>
-        </div>
-      )}
     </article>
   );
 }

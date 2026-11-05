@@ -7,6 +7,7 @@ import type { Plan } from "@/lib/types";
 import { fmtUsd } from "@/lib/format";
 import { submitPayment } from "@/app/actions/member";
 import { FormMessage, Submit } from "./AuthForms";
+import LinkedText from "./LinkedText";
 
 export type MethodInfo = { key: string; details: string };
 
@@ -111,6 +112,12 @@ export default function SubscribeForm({
           <label className="label" htmlFor="proof">{t.subscribe.proof}</label>
           <input className="input" id="proof" name="proof" type="file" accept="image/png,image/jpeg,image/webp,application/pdf" />
         </div>
+        <label className="flex items-start gap-2 text-sm">
+          <input type="checkbox" name="accept" required className="mt-1 accent-[var(--accent)]" />
+          <span>
+            <LinkedText text={t.subscribe.acceptRefund} links={{ [t.legal.terms]: `/${locale}/terms`, [t.legal.refunds]: `/${locale}/refunds` }} />
+          </span>
+        </label>
         <FormMessage state={state} />
         <Submit>{t.subscribe.submit}</Submit>
       </section>

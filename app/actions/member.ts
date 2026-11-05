@@ -27,6 +27,8 @@ export async function submitPayment(_: FormState, formData: FormData): Promise<F
   const t = getDictionary(locale);
   const session = await getSession();
   if (!session) return { error: t.subscribe.loginFirst };
+  // Payments are non-refundable, so the buyer must accept the Terms and Refund Policy first.
+  if (formData.get("accept") !== "on") return { error: t.subscribe.acceptRequired };
 
   const allowedMethods = process.env.NODE_ENV === "production" ? ["whish", "omt", "usdt", "cash"] : ["whish", "omt", "usdt", "cash", "mock"];
   const parsed = z

@@ -1,5 +1,5 @@
 -- ONE-TIME SETUP: paste this whole file into Supabase → SQL Editor → Run.
--- Generated from supabase/migrations/0001_schema.sql + supabase/seed.sql + supabase/migrations/0002_single_session.sql
+-- Generated from supabase/migrations/0001_schema.sql + supabase/seed.sql + migrations 0002 and 0003
 
 -- =============================================================
 -- Betting slips subscription site: schema, RLS and storage rules
@@ -545,3 +545,12 @@ revoke execute on function public.session_is_current() from anon, public;
 grant execute on function public.jwt_session() to authenticated;
 grant execute on function public.claim_session() to authenticated;
 grant execute on function public.session_is_current() to anon, authenticated;
+
+-- =============================================================
+-- Slips no longer carry a bookmaker booking code.
+-- Run only AFTER the site version without booking codes is live:
+-- the older version still reads this column.
+-- Paste into Supabase → SQL Editor → Run. Safe to run twice.
+-- =============================================================
+
+alter table public.slips drop column if exists betarabia_code;

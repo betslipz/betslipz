@@ -1,7 +1,9 @@
 import type { Locale } from "@/lib/config";
 import { SITE_NAME } from "@/lib/config";
 import { getDictionary } from "@/lib/i18n";
+import Link from "next/link";
 import Logo from "@/components/Logo";
+import { LEGAL_DOCS } from "@/lib/legal";
 
 export default function Footer({ locale }: { locale: Locale }) {
   const t = getDictionary(locale);
@@ -19,6 +21,13 @@ export default function Footer({ locale }: { locale: Locale }) {
             BeGambleAware
           </a>
         </p>
+        <nav className="flex flex-wrap gap-x-5 gap-y-2" aria-label={t.legal.nav}>
+          {LEGAL_DOCS.map((d) => (
+            <Link key={d} href={`/${locale}/${d}`} className="text-text hover:text-accent">
+              {t.legal[d]}
+            </Link>
+          ))}
+        </nav>
         <p>
           © {new Date().getFullYear()} <span dir="ltr">{SITE_NAME}</span>. {t.footer.rights}
         </p>

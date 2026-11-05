@@ -31,7 +31,7 @@ Demo accounts (passwords in `.dev-accounts.txt`): `admin@`, `vip@`, `regular@`, 
 ---
 
 ## 2. Daily workflow (admin)
-1. **Admin → Slips → New slip**: choose Regular or VIP, add selections (match, market, pick, odds). Total odds are calculated automatically. Then set confidence %, stake, analysis (EN/AR), an optional image, an optional **BetArabia code**, and a publish time (now or scheduled).
+1. **Admin → Slips → New slip**: choose Regular or VIP, add selections (match, market, pick, odds). Total odds are calculated automatically. Then set confidence %, stake, analysis (EN/AR), an optional image and a publish time (now or scheduled).
 2. When the matches finish, open the slip in **Admin → Slips** and set it to won, lost, void or partly won. It then appears in the public **Results** and the win-rate stats.
 3. **Admin → Payments**: check the reference or receipt against your Whish/OMT/USDT account, then **Approve** (the plan activates instantly and stacks on top of any remaining time) or **Reject** with a reason.
 4. **Admin → Users**: search, grant or revoke plans manually, ban, promote to admin.
@@ -52,12 +52,9 @@ The locked previews show only the tier, number of selections and total odds. Pic
 - **Colors:** the tokens at the top of `app/globals.css`
 - **Texts:** `lib/i18n/en.ts` and `lib/i18n/ar.ts`
 
-## 5. BetArabia
-BetArabia (Casino du Liban) has **no public API**, so the site can't place bets or load slips into users' accounts. Each slip has an "Open BetArabia" button and an optional booking-code field users can copy. If you get a partner or affiliate link from Casino du Liban, put it in `BETARABIA_URL` in `lib/config.ts`.
-
 ---
 
-## 6. Going live (Supabase Pro + Vercel Pro)
+## 5. Going live (Supabase Pro + Vercel Pro)
 1. **Supabase:** upgrade the project to **Pro** (daily backups, no pausing). Then:
    - Authentication → Providers → Email: keep **Confirm email** ON; enable **leaked-password protection**.
    - Authentication → URL Configuration: Site URL = `https://yourdomain.com`, Redirect URL = `https://yourdomain.com/auth/callback`.

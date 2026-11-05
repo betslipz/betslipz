@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import type { Locale } from "@/lib/config";
 import type { Dictionary } from "@/lib/i18n/en";
 import type { Plan } from "@/lib/types";
-import { savePrices, savePaymentMethods } from "@/app/actions/admin";
+import { savePrices, savePaymentMethods, saveContact } from "@/app/actions/admin";
 import { FormMessage, Submit } from "@/components/AuthForms";
 
 export function PricesForm({ locale, t, plans }: { locale: Locale; t: Dictionary; plans: Plan[] }) {
@@ -58,6 +58,33 @@ export function PaymentMethodsForm({
           <textarea name={`details:${key}`} rows={2} defaultValue={methods[key]?.details ?? ""} className="input" maxLength={500} dir="auto" />
         </div>
       ))}
+      <FormMessage state={state} />
+      <div className="sm:w-40">
+        <Submit>{t.common.save}</Submit>
+      </div>
+    </form>
+  );
+}
+
+export function ContactForm({ locale, t, contact }: { locale: Locale; t: Dictionary; contact: { email?: string; whatsapp?: string } }) {
+  const [state, action] = useActionState(saveContact, undefined);
+  return (
+    <form action={action} className="card space-y-4 p-5">
+      <input type="hidden" name="locale" value={locale} />
+      <div>
+        <h2 className="font-bold">{t.admin.contactTitle}</h2>
+        <p className="mt-1 text-sm text-muted">{t.admin.contactHint}</p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className="label" htmlFor="contact-email">{t.admin.contactEmail}</label>
+          <input id="contact-email" name="email" type="email" defaultValue={contact.email ?? ""} className="input" maxLength={254} dir="ltr" />
+        </div>
+        <div>
+          <label className="label" htmlFor="contact-whatsapp">{t.admin.contactWhatsapp}</label>
+          <input id="contact-whatsapp" name="whatsapp" type="tel" defaultValue={contact.whatsapp ?? ""} className="input" maxLength={40} dir="ltr" />
+        </div>
+      </div>
       <FormMessage state={state} />
       <div className="sm:w-40">
         <Submit>{t.common.save}</Submit>

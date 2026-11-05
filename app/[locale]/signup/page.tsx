@@ -7,7 +7,7 @@ export default async function SignupPage({ params }: PageProps<"/[locale]/signup
   return (
     <AuthShell title={t.auth.signupTitle}>
       <p className="mb-5 rounded-lg border border-vip/40 bg-vip/10 px-4 py-3 text-sm font-semibold text-vip">{t.auth.signupGift}</p>
-      <SignupForm locale={locale} t={t.auth} />
+      <SignupForm locale={locale} t={t.auth} legal={t.legal} />
     </AuthShell>
   );
 }

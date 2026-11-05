@@ -36,7 +36,6 @@ const slipSchema = z.object({
   stake_units: z.coerce.number().min(0.5).max(10),
   notes_en: z.string().trim().max(4000).optional().transform((v) => v || null),
   notes_ar: z.string().trim().max(4000).optional().transform((v) => v || null),
-  betarabia_code: z.string().trim().max(60).optional().transform((v) => v || null),
   publish_at: z.string().datetime(),
   legs: z.array(legSchema).max(30),
 });
@@ -63,7 +62,6 @@ export async function saveSlip(_: FormState, formData: FormData): Promise<FormSt
     stake_units: formData.get("stake_units"),
     notes_en: formData.get("notes_en") ?? undefined,
     notes_ar: formData.get("notes_ar") ?? undefined,
-    betarabia_code: formData.get("betarabia_code") ?? undefined,
     publish_at: formData.get("publish_at"),
     legs,
   });
@@ -219,4 +217,19 @@ export async function savePaymentMethods(_: FormState, formData: FormData): Prom
   if (error) return { error: error.message };
   revalidatePath(`/${locale}/subscribe`);
   return { message: "Saved." };
+}
+
+export async function saveContact(_: FormState, formData: FormData): Promise<FormState> {
+  const { locale, supabase } = await adminContext(formData);
+  const parsed = z
+    .object({
+      email: z.union([z.literal(""), z.string().trim().toLowerCase().email().max(254)]),
+      whatsapp: z.string().trim().max(40),
+    })
+    .safeParse({ email: String(formData.get("email") ?? "").trim(), whatsapp: formData.get("whatsapp") ?? "" });
+  if (!parsed.success) return { error: "Invalid email address" };
+  const { error } = await supabase.from("settings").upsert({ key: "contact", value: parsed.data });
+  if (error) return { error: error.message };
+  for (const l of ["en", "ar"]) for (const d of ["terms", "privacy", "refunds"]) revalidatePath(`/${l}/${d}`);
+  return { message: locale === "ar" ? "تم الحفظ." : "Saved." };
 }

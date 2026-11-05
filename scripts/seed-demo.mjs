@@ -64,7 +64,7 @@ const days = (d) => new Date(Date.now() - d * 864e5).toISOString();
 const samples = [
   {
     tier: "regular", title_en: "Weekend treble", title_ar: "ثلاثية نهاية الأسبوع", confidence: 72, stake_units: 2, status: "pending", publish_at: hours(-2),
-    notes_en: "Three home sides in strong form. Kept the odds sensible.", notes_ar: "ثلاثة فرق على أرضها وبمستوى قوي.", betarabia_code: "DEMO-7K2Q",
+    notes_en: "Three home sides in strong form. Kept the odds sensible.", notes_ar: "ثلاثة فرق على أرضها وبمستوى قوي.",
     legs: [
       ["Arsenal vs Brentford", "1X2", "Arsenal", 1.55, 5],
       ["Inter vs Lecce", "1X2", "Inter", 1.40, 6],
@@ -81,7 +81,6 @@ const samples = [
   {
     tier: "vip", title_en: "VIP value accumulator", title_ar: "مجمّعة VIP بقيمة عالية", confidence: 86, stake_units: 2.5, status: "pending", publish_at: hours(-1),
     notes_en: "Our strongest read of the day: line movement and team news both point the same way.", notes_ar: "أقوى قراءة لدينا اليوم.",
-    betarabia_code: "VIP-93XA",
     legs: [
       ["Liverpool vs Wolves", "Handicap", "Liverpool -1", 1.70, 5],
       ["Napoli vs Torino", "1X2", "Napoli", 1.58, 6],
