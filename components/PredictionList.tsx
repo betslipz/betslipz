@@ -69,7 +69,7 @@ export default async function PredictionList({
             <span className="text-center">{t.predictions.colOdds}</span>
             <span className="text-center">{t.predictions.colTrust}</span>
           </div>
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {g.rows.map((p) => (
               <Row key={p.id} p={p} locale={locale} t={t} showSport={showSport} teams={teams} />
             ))}
@@ -93,17 +93,14 @@ function Row({ p, locale, t, showSport, teams }: { p: Prediction; locale: Locale
         {p.kickoff_at ? timeFmt.format(new Date(p.kickoff_at)) : "—"}
       </span>
       <span className="min-w-0">
-        {(showSport || p.competition) && (
-          <span className="block truncate text-[11px] text-muted" dir="auto">
-            {showSport && <span aria-hidden>{sportEmoji(p.sport)} </span>}
-            {p.competition || t.live.sports[p.sport]}
-          </span>
-        )}
-        {[home, away].filter(Boolean).map((name) => (
-          <span key={name} className="flex min-w-0 items-center gap-1.5 py-px">
-            <TeamBadge team={teams(name, p.sport)} name={name} size={18} />
-            <span className="truncate text-sm font-semibold leading-snug sm:text-base" dir="auto">
-              {name}
+        {[home, away].filter(Boolean).map((name, i) => (
+          <span key={name}>
+            {i > 0 && <span className="block ps-[1.625rem] text-[10px] font-bold leading-none text-muted">vs</span>}
+            <span className="flex min-w-0 items-center gap-1.5 py-px">
+              <TeamBadge team={teams(name, p.sport)} name={name} size={18} />
+              <span className="truncate text-sm font-semibold leading-snug sm:text-base" dir="auto">
+                {name}
+              </span>
             </span>
           </span>
         ))}
@@ -135,6 +132,13 @@ function Row({ p, locale, t, showSport, teams }: { p: Prediction; locale: Locale
   const rowClass = `rounded-xl border bg-surface ${style.row}`;
   return (
     <li>
+      {/* League above the game's bubble. */}
+      {(showSport || p.competition) && (
+        <p className="mb-1 truncate px-1 text-xs font-semibold text-muted" dir="auto">
+          {showSport && <span aria-hidden>{sportEmoji(p.sport)} </span>}
+          {p.competition || t.live.sports[p.sport]}
+        </p>
+      )}
       {notes ? (
         <details className={`group ${rowClass}`}>
           <summary className={`${COLS} cursor-pointer list-none px-2.5 py-2.5 sm:px-3 [&::-webkit-details-marker]:hidden`}>{line}</summary>
